@@ -23,10 +23,12 @@ class BudgetScreen extends ConsumerWidget {
     final selectedMonth = ref.watch(selectedMonthProvider);
 
     return Scaffold(
+      key: const ValueKey('budget_scaffold'),
       appBar: AppBar(
         title: const Text('Budget & Recurring'),
         actions: [
           IconButton(
+            key: const ValueKey('budget_edit_button'),
             icon: const Icon(Icons.edit),
             onPressed: () => _showSetOverallBudgetModal(context, ref),
           ),
@@ -193,6 +195,7 @@ class _OverallBudgetCard extends StatelessWidget {
     }
 
     return Card(
+      key: const ValueKey('overall_budget_card'),
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -247,23 +250,30 @@ class _OverallBudgetCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Spent: ${Money.format(overview.spentPaise, showDecimal: false)} ($pct%)',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: Colors.white70),
+                Flexible(
+                  child: Text(
+                    'Spent: ${Money.format(overview.spentPaise, showDecimal: false)} ($pct%)',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.white70),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                Text(
-                  hasLimit
-                      ? 'Left: ${Money.format(overview.remainingPaise, showDecimal: false)}'
-                      : '',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: overview.remainingPaise < 0
-                        ? AppColors.tertiary
-                        : AppColors.secondary,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    hasLimit
+                        ? 'Left: ${Money.format(overview.remainingPaise, showDecimal: false)}'
+                        : '',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: overview.remainingPaise < 0
+                          ? AppColors.tertiary
+                          : AppColors.secondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -338,6 +348,7 @@ class _SpendingPieChartCard extends StatelessWidget {
     ];
 
     return Card(
+      key: const ValueKey('spending_pie_chart_card'),
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -573,6 +584,7 @@ class _RecurringExpensesList extends ConsumerWidget {
             await repo.deleteRecurringExpense(rec.id);
           },
           child: Card(
+            key: ValueKey('recurring_expense_${rec.id}'),
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               leading: Container(

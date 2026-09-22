@@ -478,17 +478,22 @@ class _MonthSelector extends StatelessWidget {
               children: months.map((m) {
                 final mStr = DateFormat('yyyy-MM').format(m);
                 final isActive = mStr == currentMonthStr;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: ChoiceChip(
-                    label: Text(DateFormat('MMM yyyy').format(m)),
-                    selected: isActive,
-                    onSelected: (_) => onMonthChanged(mStr),
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: isActive ? Colors.white : Colors.white60,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.w400,
+                return Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: ChoiceChip(
+                      label: Text(
+                        DateFormat('MMM yyyy').format(m),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      selected: isActive,
+                      onSelected: (_) => onMonthChanged(mStr),
+                      selectedColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: isActive ? Colors.white : Colors.white60,
+                        fontWeight:
+                            isActive ? FontWeight.w600 : FontWeight.w400,
+                      ),
                     ),
                   ),
                 );

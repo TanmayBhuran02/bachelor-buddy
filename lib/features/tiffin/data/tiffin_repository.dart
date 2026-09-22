@@ -48,15 +48,21 @@ class TiffinRepository {
 
   /// Watch plans with their daily log status for a specific date (YYYY-MM-DD)
   Stream<List<TiffinPlanWithLog>> watchPlansForDate(String dateStr) {
-    return watchActivePlans().asyncMap((plans) async {
-      final results = <TiffinPlanWithLog>[];
-      for (final plan in plans) {
-        final log = await (_db.select(_db.tiffinLogs)
-              ..where((l) => l.planId.equals(plan.id) & l.date.equals(dateStr)))
-            .getSingleOrNull();
-        results.add(TiffinPlanWithLog(plan: plan, log: log));
-      }
-      return results;
+    final query = _db.select(_db.tiffinPlans).join([
+      leftOuterJoin(
+        _db.tiffinLogs,
+        _db.tiffinLogs.planId.equalsExp(_db.tiffinPlans.id) &
+            _db.tiffinLogs.date.equals(dateStr),
+      ),
+    ])..where(_db.tiffinPlans.isActive.equals(true));
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        return TiffinPlanWithLog(
+          plan: row.readTable(_db.tiffinPlans),
+          log: row.readTableOrNull(_db.tiffinLogs),
+        );
+      }).toList();
     });
   }
 

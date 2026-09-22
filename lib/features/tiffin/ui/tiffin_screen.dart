@@ -485,45 +485,39 @@ class _TiffinMealCard extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: status == 'skipped'
-                          ? AppColors.tertiary
-                          : Colors.white70,
-                      side: BorderSide(
-                        color: status == 'skipped'
-                            ? AppColors.tertiary
-                            : Colors.white24,
+            // Action buttons — only show when pending
+            if (status == 'pending') ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white70,
+                        side: const BorderSide(color: Colors.white24),
                       ),
+                      onPressed: () async {
+                        await repo.markSkipped(planId: plan.id, date: dateStr);
+                      },
+                      icon: const Icon(Icons.close, size: 16),
+                      label: const Text('Skip'),
                     ),
-                    onPressed: () async {
-                      await repo.markSkipped(planId: plan.id, date: dateStr);
-                    },
-                    icon: const Icon(Icons.close, size: 16),
-                    label: const Text('Skip'),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: status == 'received'
-                          ? AppColors.secondary
-                          : AppColors.primary,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                      onPressed: () async {
+                        await repo.markReceived(planId: plan.id, date: dateStr);
+                      },
+                      icon: const Icon(Icons.check, size: 16),
+                      label: const Text('Received'),
                     ),
-                    onPressed: () async {
-                      await repo.markReceived(planId: plan.id, date: dateStr);
-                    },
-                    icon: const Icon(Icons.check, size: 16),
-                    label: const Text('Received'),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

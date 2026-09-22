@@ -20,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
     ref.watch(actionRunnerProvider);
 
     return Scaffold(
+      key: const ValueKey('home_scaffold'),
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,6 +36,7 @@ class HomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            key: const ValueKey('home_settings_button'),
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/settings'),
           ),
@@ -44,23 +46,23 @@ class HomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
           // Budget Overview Card
-          _LiveBudgetOverviewCard(),
+          _LiveBudgetOverviewCard(key: const ValueKey('home_budget_overview')),
           const SizedBox(height: 8),
 
           // Quick Actions
-          _QuickActionsRow(),
+          _QuickActionsRow(key: const ValueKey('home_quick_actions')),
           const SizedBox(height: 8),
 
           // Today's Tiffin
-          _LiveTiffinStatusCard(),
+          _LiveTiffinStatusCard(key: const ValueKey('home_tiffin_status')),
           const SizedBox(height: 4),
 
           // Water Progress
-          _LiveWaterProgressCard(),
+          _LiveWaterProgressCard(key: const ValueKey('home_water_progress')),
           const SizedBox(height: 4),
 
           // Top Tasks
-          _LiveTopTasksCard(),
+          _LiveTopTasksCard(key: const ValueKey('home_top_tasks')),
           const SizedBox(height: 80), // Bottom padding for nav bar
         ],
       ),
@@ -76,6 +78,8 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _LiveBudgetOverviewCard extends ConsumerWidget {
+  const _LiveBudgetOverviewCard({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final overviewAsync = ref.watch(budgetOverviewProvider);
@@ -95,6 +99,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
         }
 
         return Card(
+          key: const ValueKey('budget_overview_card'),
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
@@ -126,20 +131,26 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(
-                        Money.format(overview.spentPaise, showDecimal: false),
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      if (hasLimit)
-                        Text(
-                          ' / ${Money.format(overview.limitPaise, showDecimal: false)}',
+                      Flexible(
+                        child: Text(
+                          Money.format(overview.spentPaise, showDecimal: false),
                           style: Theme.of(context)
                               .textTheme
-                              .bodyLarge
-                              ?.copyWith(color: Colors.white38),
+                              .headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (hasLimit)
+                        Flexible(
+                          child: Text(
+                            ' / ${Money.format(overview.limitPaise, showDecimal: false)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(color: Colors.white38),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                   ),
@@ -178,6 +189,8 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
 }
 
 class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow({super.key});
+
   @override
   Widget build(BuildContext context) {
     final actions = [
@@ -192,27 +205,30 @@ class _QuickActionsRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: actions.map((a) {
-          return GestureDetector(
-            onTap: () => context.push(a.$3),
-            child: Column(
-              children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
+          return Flexible(
+            child: GestureDetector(
+              onTap: () => context.push(a.$3),
+              child: Column(
+                children: [
+                  Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(a.$2, color: AppColors.primary, size: 24),
                   ),
-                  child: Icon(a.$2, color: AppColors.primary, size: 24),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  a.$1,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white70,
-                      ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    a.$1,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white70,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           );
         }).toList(),
@@ -222,11 +238,14 @@ class _QuickActionsRow extends StatelessWidget {
 }
 
 class _LiveTiffinStatusCard extends ConsumerWidget {
+  const _LiveTiffinStatusCard({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final plansAsync = ref.watch(tiffinPlansForSelectedDateProvider);
 
     return Card(
+      key: const ValueKey('tiffin_status_card'),
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -345,11 +364,14 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
 }
 
 class _LiveWaterProgressCard extends ConsumerWidget {
+  const _LiveWaterProgressCard({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final waterAsync = ref.watch(todayWaterStatusProvider);
 
     return Card(
+      key: const ValueKey('water_progress_card'),
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -394,6 +416,7 @@ class _LiveWaterProgressCard extends ConsumerWidget {
                   ),
                 ),
                 FilledButton.tonal(
+                  key: const ValueKey('water_add_glass_button'),
                   onPressed: () async {
                     final repo = ref.read(waterRepositoryProvider);
                     await repo.addWater(status.glassMl);
@@ -420,11 +443,14 @@ class _LiveWaterProgressCard extends ConsumerWidget {
 }
 
 class _LiveTopTasksCard extends ConsumerWidget {
+  const _LiveTopTasksCard({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todosAsync = ref.watch(todosStreamProvider);
 
     return Card(
+      key: const ValueKey('top_tasks_card'),
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
