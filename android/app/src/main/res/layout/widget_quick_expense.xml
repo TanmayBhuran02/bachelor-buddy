@@ -3,49 +3,84 @@
     android:id="@+id/widget_quick_expense_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/launch_background"
+    android:background="@drawable/widget_background"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="14dp">
 
-    <TextView
-        android:id="@+id/quick_expense_title"
-        android:layout_width="wrap_content"
+    <!-- Header Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Quick Log Expense"
-        android:textColor="#FF9E9E"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_widget_expense" />
+
+        <TextView
+            android:id="@+id/quick_expense_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:text="QUICK EXPENSE"
+            android:textColor="#FF6B6B"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1-Tap Log"
+            android:textColor="#9E9EB0"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Quick Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
-        <Button
+        <TextView
             android:id="@+id/btn_quick_chai"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="32dp"
             android:layout_weight="1"
+            android:background="@drawable/widget_btn_coral"
+            android:gravity="center"
             android:text="Chai ₹20"
-            android:textSize="11sp" />
+            android:textColor="#FF6B6B"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-        <Button
+        <TextView
             android:id="@+id/btn_quick_lunch"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="32dp"
             android:layout_marginStart="6dp"
             android:layout_weight="1"
+            android:background="@drawable/widget_btn_coral"
+            android:gravity="center"
             android:text="Meal ₹100"
-            android:textSize="11sp" />
+            android:textColor="#FF6B6B"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-        <Button
+        <TextView
             android:id="@+id/btn_quick_custom"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="32dp"
             android:layout_marginStart="6dp"
             android:layout_weight="1"
+            android:background="@drawable/widget_btn_secondary"
+            android:gravity="center"
             android:text="+ Custom"
-            android:textSize="11sp" />
+            android:textColor="#B0B0C4"
+            android:textSize="12sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

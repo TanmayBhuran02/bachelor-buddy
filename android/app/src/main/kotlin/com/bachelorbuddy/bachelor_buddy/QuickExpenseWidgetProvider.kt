@@ -24,12 +24,12 @@ class QuickExpenseWidgetProvider : HomeWidgetProvider() {
             val chaiIntent = HomeWidgetBackgroundIntent.getBroadcast(context, chaiUri)
             views.setOnClickPendingIntent(R.id.btn_quick_chai, chaiIntent)
 
-            // Quick Lunch ₹100 intent
-            val lunchUri = Uri.parse("bachelorbuddy://quick_expense?amount=10000&note=Lunch&category=Food")
+            // Quick Lunch/Meal ₹100 intent
+            val lunchUri = Uri.parse("bachelorbuddy://quick_expense?amount=10000&note=Meal&category=Food")
             val lunchIntent = HomeWidgetBackgroundIntent.getBroadcast(context, lunchUri)
             views.setOnClickPendingIntent(R.id.btn_quick_lunch, lunchIntent)
 
-            // Custom opens app
+            // Custom opens app to Add Expense screen
             val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
             views.setOnClickPendingIntent(R.id.btn_quick_custom, pendingIntent)
             views.setOnClickPendingIntent(R.id.widget_quick_expense_container, pendingIntent)

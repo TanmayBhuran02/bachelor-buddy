@@ -30,9 +30,15 @@ class BudgetWidgetProvider : HomeWidgetProvider() {
                     views.setTextViewText(R.id.budget_widget_spent, "$spentStr / $limitStr")
                     views.setProgressBar(R.id.budget_widget_progress, 100, percentage.coerceIn(0, 100), false)
                     views.setTextViewText(R.id.budget_widget_safe_to_spend, "Safe to spend: $safeToSpendStr")
+                    views.setTextViewText(R.id.budget_widget_percent, "$percentage%")
                 } catch (e: Exception) {
                     // Fallback
                 }
+            } else {
+                views.setTextViewText(R.id.budget_widget_spent, "₹0 / ₹0")
+                views.setProgressBar(R.id.budget_widget_progress, 100, 0, false)
+                views.setTextViewText(R.id.budget_widget_safe_to_spend, "Tap to configure budget")
+                views.setTextViewText(R.id.budget_widget_percent, "0%")
             }
 
             val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)

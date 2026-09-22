@@ -24,10 +24,13 @@ class TodoWidgetProvider : HomeWidgetProvider() {
                 try {
                     val json = JSONObject(rawData)
                     val tasks = json.optJSONArray("tasks") ?: JSONArray()
+                    val count = tasks.length()
 
-                    val t1 = if (tasks.length() > 0) "• " + tasks.getJSONObject(0).optString("title") else "No pending tasks"
-                    val t2 = if (tasks.length() > 1) "• " + tasks.getJSONObject(1).optString("title") else ""
-                    val t3 = if (tasks.length() > 2) "• " + tasks.getJSONObject(2).optString("title") else ""
+                    views.setTextViewText(R.id.todo_widget_count, "$count tasks")
+
+                    val t1 = if (count > 0) "• " + tasks.getJSONObject(0).optString("title") else "No pending tasks"
+                    val t2 = if (count > 1) "• " + tasks.getJSONObject(1).optString("title") else ""
+                    val t3 = if (count > 2) "• " + tasks.getJSONObject(2).optString("title") else ""
 
                     views.setTextViewText(R.id.todo_widget_item1, t1)
                     views.setTextViewText(R.id.todo_widget_item2, t2)
@@ -35,6 +38,11 @@ class TodoWidgetProvider : HomeWidgetProvider() {
                 } catch (e: Exception) {
                     // Fallback
                 }
+            } else {
+                views.setTextViewText(R.id.todo_widget_count, "0 tasks")
+                views.setTextViewText(R.id.todo_widget_item1, "No pending tasks")
+                views.setTextViewText(R.id.todo_widget_item2, "")
+                views.setTextViewText(R.id.todo_widget_item3, "")
             }
 
             val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)

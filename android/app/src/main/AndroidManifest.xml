@@ -31,6 +31,8 @@
         <!-- Tiffin Widget Receiver -->
         <receiver
             android:name=".TiffinWidgetProvider"
+            android:label="@string/widget_tiffin_name"
+            android:icon="@drawable/ic_widget_tiffin"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -43,6 +45,8 @@
         <!-- Water Widget Receiver -->
         <receiver
             android:name=".WaterWidgetProvider"
+            android:label="@string/widget_water_name"
+            android:icon="@drawable/ic_widget_water"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -55,6 +59,8 @@
         <!-- Todo Widget Receiver -->
         <receiver
             android:name=".TodoWidgetProvider"
+            android:label="@string/widget_todo_name"
+            android:icon="@drawable/ic_widget_todo"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -67,6 +73,8 @@
         <!-- Budget Widget Receiver -->
         <receiver
             android:name=".BudgetWidgetProvider"
+            android:label="@string/widget_budget_name"
+            android:icon="@drawable/ic_widget_budget"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -79,6 +87,8 @@
         <!-- Quick Expense Widget Receiver -->
         <receiver
             android:name=".QuickExpenseWidgetProvider"
+            android:label="@string/widget_quick_expense_name"
+            android:icon="@drawable/ic_widget_expense"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

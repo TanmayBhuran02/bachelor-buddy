@@ -3,43 +3,83 @@
     android:id="@+id/widget_todo_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/launch_background"
+    android:background="@drawable/widget_background"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="14dp">
 
-    <TextView
-        android:id="@+id/todo_widget_title"
-        android:layout_width="wrap_content"
+    <!-- Header Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tasks Due Today"
-        android:textColor="#FFB74D"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/todo_widget_item1"
-        android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_widget_todo" />
+
+        <TextView
+            android:id="@+id/todo_widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:text="TASKS DUE TODAY"
+            android:textColor="#FFB74D"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/todo_widget_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 tasks"
+            android:textColor="#9E9EB0"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Task List Items -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="• Buy Groceries for ₹450"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/todo_widget_item2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="• Pay Electricity Bill"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp" />
+        <TextView
+            android:id="@+id/todo_widget_item1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:text="• Buy Groceries"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
 
-    <TextView
-        android:id="@+id/todo_widget_item3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="• Confirm Tiffin"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp" />
+        <TextView
+            android:id="@+id/todo_widget_item2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:text="• Pay Electricity Bill"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/todo_widget_item3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:text="• Confirm Tiffin"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
 </LinearLayout>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App & General Strings -->
+    <string name="app_name">Bachelor Buddy</string>
+
+    <!-- Widget Titles (Display names in Android Widget Picker) -->
+    <string name="widget_water_name">Hydration Tracker</string>
+    <string name="widget_tiffin_name">Tiffin Tracker</string>
+    <string name="widget_budget_name">Monthly Budget</string>
+    <string name="widget_todo_name">Tasks Due Today</string>
+    <string name="widget_quick_expense_name">Quick Expense</string>
+
+    <!-- Widget Descriptions (Android 12+) -->
+    <string name="widget_water_desc">Track daily water intake and quick log glasses</string>
+    <string name="widget_tiffin_desc">Track today\'s meal delivery and confirm or skip</string>
+    <string name="widget_budget_desc">Monitor monthly budget, progress, and safe daily spend</string>
+    <string name="widget_todo_desc">View top priority tasks and todos for today</string>
+    <string name="widget_quick_expense_desc">One-tap logging for daily expenses like chai and meals</string>
+</resources>
