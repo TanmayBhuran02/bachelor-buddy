@@ -78,6 +78,13 @@ GoRouter createRouter({bool showOnboarding = false}) {
                 parentNavigatorKey: _rootNavigatorKey,
                 builder: (context, state) => const AddTodoScreen(),
               ),
+              GoRoute(
+                path: 'edit/:id',
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => AddTodoScreen(
+                  editTodoId: state.pathParameters['id'],
+                ),
+              ),
             ],
           ),
           GoRoute(

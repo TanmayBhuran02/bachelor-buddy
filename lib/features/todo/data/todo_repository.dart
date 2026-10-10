@@ -18,7 +18,9 @@ class TodoRepository {
 
   TodoRepository(this._db, this._eventBus);
 
-  /// Watch todos with optional filter (all, pending, completed)
+  /// Watch todos with optional filter (all, pending, completed).
+  /// Recurring tasks with a future dueAt are automatically hidden
+  /// from the pending view — they only appear once `now >= dueAt date`.
   Stream<List<Todo>> watchTodos({bool? isDone, int? priorityFilter}) {
     final query = _db.select(_db.todos);
     if (isDone != null) {
@@ -33,7 +35,25 @@ class TodoRepository {
       (t) => OrderingTerm.asc(t.dueAt),
       (t) => OrderingTerm.desc(t.createdAt),
     ]);
-    return query.watch();
+    // Post-filter in Dart: hide recurring tasks whose dueAt is in the future
+    return query.watch().map((todos) {
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+      return todos.where((t) {
+        if (t.recurrence == 'none') return true;
+        if (t.dueAt == null) return true;
+        final dueDate = DateTime.fromMillisecondsSinceEpoch(t.dueAt!);
+        final dueDayStart = DateTime(dueDate.year, dueDate.month, dueDate.day);
+        // Only show if due today or before
+        return !dueDayStart.isAfter(todayStart);
+      }).toList();
+    });
+  }
+
+  /// Get a single todo by ID
+  Future<Todo?> getTodoById(String id) {
+    return (_db.select(_db.todos)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
   }
 
   /// Add a new todo
@@ -71,11 +91,43 @@ class TodoRepository {
     return id;
   }
 
-  /// Toggle completion of a todo
-  Future<void> toggleTodo(String id) async {
+  /// Update an existing todo's editable fields
+  Future<void> updateTodo({
+    required String id,
+    required String title,
+    String notes = '',
+    int? dueAt,
+    int priority = 1,
+    String recurrence = 'none',
+  }) async {
+    await (_db.update(_db.todos)..where((t) => t.id.equals(id))).write(
+      TodosCompanion(
+        title: Value(title),
+        notes: Value(notes),
+        dueAt: Value(dueAt),
+        priority: Value(priority),
+        recurrence: Value(recurrence),
+      ),
+    );
+  }
+
+  /// Toggle completion of a todo.
+  /// Returns false if toggle was blocked (past completed recurring task).
+  Future<bool> toggleTodo(String id) async {
     final todo = await (_db.select(_db.todos)..where((t) => t.id.equals(id)))
         .getSingleOrNull();
-    if (todo == null) return;
+    if (todo == null) return false;
+
+    // Block unchecking a recurring task that was completed on a past date
+    if (todo.isDone && todo.recurrence != 'none' && todo.doneAt != null) {
+      final doneDate = DateTime.fromMillisecondsSinceEpoch(todo.doneAt!);
+      final now = DateTime.now();
+      final doneDayStart = DateTime(doneDate.year, doneDate.month, doneDate.day);
+      final todayStart = DateTime(now.year, now.month, now.day);
+      if (doneDayStart.isBefore(todayStart)) {
+        return false; // blocked
+      }
+    }
 
     final newStatus = !todo.isDone;
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
@@ -101,6 +153,8 @@ class TodoRepository {
         _generateNextOccurrence(todo);
       }
     }
+
+    return true;
   }
 
   /// Generate next occurrence for recurring tasks

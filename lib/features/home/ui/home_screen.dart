@@ -83,7 +83,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final overviewAsync = ref.watch(budgetOverviewProvider);
+    final overviewAsync = ref.watch(currentMonthBudgetOverviewProvider);
 
     return overviewAsync.when(
       data: (overview) {

@@ -1,4 +1,4 @@
-/// Add To-Do screen with real-time intent parser detection chip,
+/// Add / Edit To-Do screen with real-time intent parser detection chip,
 /// priority selector, and recurrence options.
 library;
 
@@ -13,7 +13,10 @@ import 'package:bachelor_buddy/features/actions/action_intent.dart';
 import 'package:bachelor_buddy/features/todo/domain/todo_providers.dart';
 
 class AddTodoScreen extends ConsumerStatefulWidget {
-  const AddTodoScreen({super.key});
+  /// When non-null, the screen edits an existing todo.
+  final String? editTodoId;
+
+  const AddTodoScreen({super.key, this.editTodoId});
 
   @override
   ConsumerState<AddTodoScreen> createState() => _AddTodoScreenState();
@@ -31,12 +34,38 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
   ActionIntent? _detectedIntent;
   bool _includeDetectedAction = true;
   bool _isLoading = false;
+  bool _isEditMode = false;
+  bool _initialDataLoaded = false;
 
   @override
   void initState() {
     super.initState();
+    _isEditMode = widget.editTodoId != null;
     _titleController.addListener(_onTextChanged);
     _notesController.addListener(_onTextChanged);
+
+    if (_isEditMode) {
+      _loadExistingTodo();
+    }
+  }
+
+  Future<void> _loadExistingTodo() async {
+    final repo = ref.read(todoRepositoryProvider);
+    final todo = await repo.getTodoById(widget.editTodoId!);
+    if (todo == null || !mounted) return;
+
+    _titleController.text = todo.title;
+    _notesController.text = todo.notes;
+    _priority = todo.priority;
+    _recurrence = todo.recurrence;
+
+    if (todo.dueAt != null) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(todo.dueAt!);
+      _dueDate = dt;
+      _dueTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+    }
+
+    setState(() => _initialDataLoaded = true);
   }
 
   @override
@@ -47,6 +76,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
   }
 
   Future<void> _onTextChanged() async {
+    if (_isEditMode) return; // Skip intent detection in edit mode
     final text = '${_titleController.text} ${_notesController.text}'.trim();
     final parser = ref.read(intentParserProvider);
     final intent = await parser.parse(text);
@@ -84,14 +114,26 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
       }
 
       final repo = ref.read(todoRepositoryProvider);
-      await repo.addTodo(
-        title: title,
-        notes: _notesController.text.trim(),
-        dueAt: dueEpoch,
-        priority: _priority,
-        recurrence: _recurrence,
-        actionIntent: _includeDetectedAction ? _detectedIntent : null,
-      );
+
+      if (_isEditMode) {
+        await repo.updateTodo(
+          id: widget.editTodoId!,
+          title: title,
+          notes: _notesController.text.trim(),
+          dueAt: dueEpoch,
+          priority: _priority,
+          recurrence: _recurrence,
+        );
+      } else {
+        await repo.addTodo(
+          title: title,
+          notes: _notesController.text.trim(),
+          dueAt: dueEpoch,
+          priority: _priority,
+          recurrence: _recurrence,
+          actionIntent: _includeDetectedAction ? _detectedIntent : null,
+        );
+      }
 
       if (mounted) {
         context.pop();
@@ -111,9 +153,17 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // In edit mode, wait for data to load
+    if (_isEditMode && !_initialDataLoaded) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('EDIT TASK')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ADD TASK'),
+        title: Text(_isEditMode ? 'EDIT TASK' : 'ADD TASK'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -123,7 +173,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
             // Title input
             TextField(
               controller: _titleController,
-              autofocus: true,
+              autofocus: !_isEditMode,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.titleMedium,
               decoration: const InputDecoration(
@@ -133,8 +183,8 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
             ),
             const Divider(height: 24),
 
-            // Live Intent Detection Card
-            if (_detectedIntent != null) ...[
+            // Live Intent Detection Card (only in add mode)
+            if (!_isEditMode && _detectedIntent != null) ...[
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -243,6 +293,15 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                           ? DateFormat('d MMM yyyy').format(_dueDate!).toUpperCase()
                           : 'NOT SET',
                     ),
+                    trailing: _dueDate != null
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () => setState(() {
+                              _dueDate = null;
+                              _dueTime = null;
+                            }),
+                          )
+                        : null,
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
@@ -311,9 +370,9 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.markerBlack),
                       )
-                    : const Text(
-                        'SAVE TASK',
-                        style: TextStyle(
+                    : Text(
+                        _isEditMode ? 'UPDATE TASK' : 'SAVE TASK',
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
               ),

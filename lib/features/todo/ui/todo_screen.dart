@@ -1,5 +1,5 @@
 /// To-Do list screen with task filtering, completion checkboxes,
-/// priority badges, action indicators, and delete actions.
+/// priority badges, action indicators, edit and delete actions.
 library;
 
 import 'dart:convert';
@@ -153,9 +153,22 @@ class _TodoItemTile extends ConsumerWidget {
 
   const _TodoItemTile({required this.todo});
 
+  /// Whether this is a completed recurring task from a past date (locked).
+  bool _isLockedPastRecurring() {
+    if (!todo.isDone || todo.recurrence == 'none' || todo.doneAt == null) {
+      return false;
+    }
+    final doneDate = DateTime.fromMillisecondsSinceEpoch(todo.doneAt!);
+    final now = DateTime.now();
+    final doneDayStart = DateTime(doneDate.year, doneDate.month, doneDate.day);
+    final todayStart = DateTime(now.year, now.month, now.day);
+    return doneDayStart.isBefore(todayStart);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(todoRepositoryProvider);
+    final isLocked = _isLockedPastRecurring();
 
     Color priorityColor = switch (todo.priority) {
       0 => AppColors.tertiary,
@@ -180,6 +193,26 @@ class _TodoItemTile extends ConsumerWidget {
     return Dismissible(
       key: ValueKey(todo.id),
       direction: DismissDirection.endToStart,
+      confirmDismiss: (_) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('DELETE TASK'),
+            content: Text('Delete "${todo.title}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('CANCEL'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text('DELETE',
+                    style: TextStyle(color: AppColors.tertiary)),
+              ),
+            ],
+          ),
+        ) ?? false;
+      },
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
@@ -196,131 +229,223 @@ class _TodoItemTile extends ConsumerWidget {
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Checkbox
-              Checkbox(
-                value: todo.isDone,
-                activeColor: AppColors.secondary,
-                onChanged: (_) async {
-                  await repo.toggleTodo(todo.id);
-                },
-              ),
-              const SizedBox(width: 8),
+        child: InkWell(
+          onTap: () => context.push('/todo/edit/${todo.id}'),
+          onLongPress: () => _showOptionsSheet(context, ref),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Checkbox — disabled if locked past recurring
+                Checkbox(
+                  value: todo.isDone,
+                  activeColor: AppColors.secondary,
+                  onChanged: isLocked
+                      ? null
+                      : (_) async {
+                          final success = await repo.toggleTodo(todo.id);
+                          if (!success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Cannot uncheck a task completed on a past date'),
+                              ),
+                            );
+                          }
+                        },
+                ),
+                const SizedBox(width: 8),
 
-              // Title and details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            todo.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  decoration: todo.isDone
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                  color: todo.isDone
-                                      ? AppColors.textSubtle(context)
-                                      : AppColors.text(context),
-                                  fontWeight: FontWeight.w600,
-                                ),
+                // Title and details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              todo.title,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    decoration: todo.isDone
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                    color: todo.isDone
+                                        ? AppColors.textSubtle(context)
+                                        : AppColors.text(context),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
                           ),
-                        ),
-                        // Priority square dot
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: priorityColor,
-                            borderRadius: BorderRadius.circular(1),
+                          // Priority square dot
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: priorityColor,
+                              borderRadius: BorderRadius.circular(1),
+                            ),
                           ),
+                        ],
+                      ),
+                      if (todo.notes.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          todo.notes,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textMuted(context)),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
-                    ),
-                    if (todo.notes.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        todo.notes,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppColors.textMuted(context)),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                    // Badges row (Due Date, Action chip, Recurrence)
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        if (todo.dueAt != null)
-                          _DueBadge(dueEpoch: todo.dueAt!, isDone: todo.isDone),
-                        if (todo.recurrence != 'none')
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface(context),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.repeat,
-                                    size: 10, color: AppColors.textMuted(context)),
-                                const SizedBox(width: 4),
-                                Text(
-                                  todo.recurrence.toUpperCase(),
-                                  style: TextStyle(
-                                      fontSize: 9, color: AppColors.textMuted(context), letterSpacing: 0.5),
-                                ),
-                              ],
-                            ),
-                          ),
-                        if (actionLabel != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: (todo.actionStatus == 'executed'
-                                      ? AppColors.secondary
-                                      : AppColors.primary)
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                            child: Text(
-                              todo.actionStatus == 'executed'
-                                  ? '// LOGGED'
-                                  : actionLabel,
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w600,
-                                color: todo.actionStatus == 'executed'
-                                    ? AppColors.secondary
-                                    : AppColors.primary,
-                                letterSpacing: 0.5,
+                      // Badges row (Due Date, Action chip, Recurrence, Lock)
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          if (todo.dueAt != null)
+                            _DueBadge(dueEpoch: todo.dueAt!, isDone: todo.isDone),
+                          if (todo.recurrence != 'none')
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface(context),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.repeat,
+                                      size: 10, color: AppColors.textMuted(context)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    todo.recurrence.toUpperCase(),
+                                    style: TextStyle(
+                                        fontSize: 9, color: AppColors.textMuted(context), letterSpacing: 0.5),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ],
+                          if (isLocked)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.textSubtle(context).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.lock_outline,
+                                      size: 10, color: AppColors.textSubtle(context)),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    'LOCKED',
+                                    style: TextStyle(
+                                        fontSize: 9, color: AppColors.textSubtle(context), letterSpacing: 0.5),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (actionLabel != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: (todo.actionStatus == 'executed'
+                                        ? AppColors.secondary
+                                        : AppColors.primary)
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Text(
+                                todo.actionStatus == 'executed'
+                                    ? '// LOGGED'
+                                    : actionLabel,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                  color: todo.actionStatus == 'executed'
+                                      ? AppColors.secondary
+                                      : AppColors.primary,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showOptionsSheet(BuildContext context, WidgetRef ref) {
+    final repo = ref.read(todoRepositoryProvider);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: const Text('EDIT TASK'),
+              onTap: () {
+                Navigator.pop(ctx);
+                context.push('/todo/edit/${todo.id}');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete_outline, color: AppColors.tertiary),
+              title: Text('DELETE TASK',
+                  style: TextStyle(color: AppColors.tertiary)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (dlg) => AlertDialog(
+                    title: const Text('DELETE TASK'),
+                    content: Text('Delete "${todo.title}"?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dlg, false),
+                        child: const Text('CANCEL'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(dlg, true),
+                        child: Text('DELETE',
+                            style: TextStyle(color: AppColors.tertiary)),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await repo.deleteTodo(todo.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${todo.title} deleted')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
         ),
       ),
     );
