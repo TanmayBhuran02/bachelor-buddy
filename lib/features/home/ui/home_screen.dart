@@ -120,7 +120,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                           Text('DETAILS →',
                               style: TextStyle(
                                   fontSize: 10,
-                                  color: const Color(0xFF888888),
+                                  color: AppColors.textMuted(context),
                                   letterSpacing: 1)),
                         ],
                       ),
@@ -148,7 +148,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyLarge
-                                ?.copyWith(color: const Color(0xFF555555)),
+                                ?.copyWith(color: AppColors.textSubtle(context)),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -158,7 +158,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                   LinearProgressIndicator(
                     value: progress,
                     minHeight: 8,
-                    backgroundColor: const Color(0xFF2A2A2A),
+                    backgroundColor: AppColors.track(context),
                     valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                   ),
                   const SizedBox(height: 8),
@@ -169,7 +169,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: hasLimit
                               ? AppColors.secondary
-                              : const Color(0xFF777777),
+                              : AppColors.textMuted(context),
                         ),
                   ),
                 ],
@@ -213,9 +213,9 @@ class _QuickActionsRow extends StatelessWidget {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1F1F1F),
+                      color: AppColors.surface(context),
                       borderRadius: BorderRadius.circular(2),
-                      border: Border.all(color: const Color(0xFF3A3A3A)),
+                      border: Border.all(color: AppColors.border(context), width: 1.5),
                     ),
                     child: Icon(a.$2, color: AppColors.kraftBrown, size: 22),
                   ),
@@ -223,7 +223,7 @@ class _QuickActionsRow extends StatelessWidget {
                   Text(
                     a.$1,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: const Color(0xFF888888),
+                          color: AppColors.textMuted(context),
                           letterSpacing: 0.8,
                         ),
                     overflow: TextOverflow.ellipsis,
@@ -270,7 +270,7 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                   child: Text('VIEW ALL →',
                       style: TextStyle(
                           fontSize: 10,
-                          color: const Color(0xFF888888),
+                          color: AppColors.textMuted(context),
                           letterSpacing: 1)),
                 ),
               ],
@@ -279,12 +279,12 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
             plansAsync.when(
               data: (plans) {
                 if (plans.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
                       'No active tiffin plans. Tap to configure.',
                       style:
-                          TextStyle(fontSize: 11, color: Color(0xFF555555)),
+                          TextStyle(fontSize: 11, color: AppColors.textSubtle(context)),
                     ),
                   );
                 }
@@ -386,8 +386,9 @@ class _LiveWaterProgressCard extends ConsumerWidget {
                   height: 58,
                   child: Container(
                     decoration: BoxDecoration(
+                      color: AppColors.surface(context),
                       borderRadius: BorderRadius.circular(2),
-                      border: Border.all(color: const Color(0xFF3A3A3A)),
+                      border: Border.all(color: AppColors.border(context), width: 1.5),
                     ),
                     child: Center(
                       child: Text('$percent%',
@@ -407,7 +408,7 @@ class _LiveWaterProgressCard extends ConsumerWidget {
                       Text(
                         '${status.glassesDrank} glasses today',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: const Color(0xFF888888),
+                              color: AppColors.textMuted(context),
                             ),
                       ),
                     ],
@@ -467,7 +468,7 @@ class _LiveTopTasksCard extends ConsumerWidget {
                   child: Text('VIEW ALL →',
                       style: TextStyle(
                           fontSize: 10,
-                          color: const Color(0xFF888888),
+                          color: AppColors.textMuted(context),
                           letterSpacing: 1)),
                 ),
               ],
@@ -479,11 +480,11 @@ class _LiveTopTasksCard extends ConsumerWidget {
                     todos.where((t) => !t.isDone).take(3).toList();
 
                 if (pendingTodos.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text('All tasks completed.',
                         style: TextStyle(
-                            fontSize: 11, color: Color(0xFF777777))),
+                            fontSize: 11, color: AppColors.textSubtle(context))),
                   );
                 }
 

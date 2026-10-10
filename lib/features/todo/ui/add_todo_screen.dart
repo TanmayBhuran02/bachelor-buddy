@@ -138,7 +138,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1F1F1F),
+                  color: AppColors.surface(context),
                   borderRadius: BorderRadius.circular(2),
                   border: Border.all(
                     color: AppColors.primary.withValues(alpha: 0.5),
@@ -171,7 +171,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
-                                ?.copyWith(color: const Color(0xFF777777)),
+                                ?.copyWith(color: AppColors.textMuted(context)),
                           ),
                         ],
                       ),
@@ -349,10 +349,10 @@ class _PriorityOption extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? color.withValues(alpha: 0.15)
-                : const Color(0xFF1F1F1F),
+                : AppColors.surface(context),
             borderRadius: BorderRadius.circular(2),
             border: Border.all(
-              color: isSelected ? color : const Color(0xFF3A3A3A),
+              color: isSelected ? color : AppColors.border(context),
               width: 1,
             ),
           ),
@@ -360,7 +360,7 @@ class _PriorityOption extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? color : const Color(0xFF777777),
+                color: isSelected ? color : AppColors.textMuted(context),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 11,
                 letterSpacing: 0.8,

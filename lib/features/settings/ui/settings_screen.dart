@@ -204,16 +204,16 @@ class SettingsScreen extends ConsumerWidget {
                 const Divider(),
                 Expanded(
                   child: logs.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Text('No diagnostic logs captured yet',
-                              style: TextStyle(color: Color(0xFF555555))),
+                              style: TextStyle(color: AppColors.textSubtle(context))),
                         )
                       : ListView.builder(
                           itemCount: logs.length,
                           itemBuilder: (context, index) {
                             final log = logs[index];
                             final color = switch (log.level) {
-                              LogLevel.info => const Color(0xFF888888),
+                              LogLevel.info => AppColors.textMuted(context),
                               LogLevel.warning => AppColors.warning,
                               LogLevel.error => AppColors.tertiary,
                             };

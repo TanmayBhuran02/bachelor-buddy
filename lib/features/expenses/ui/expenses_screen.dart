@@ -147,14 +147,14 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.receipt_long,
-                            size: 48, color: const Color(0xFF3A3A3A)),
+                            size: 48, color: AppColors.border(context)),
                         const SizedBox(height: 16),
                         Text(
                           'No transactions for this month',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
-                              ?.copyWith(color: const Color(0xFF888888)),
+                              ?.copyWith(color: AppColors.textMuted(context)),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -162,7 +162,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: const Color(0xFF555555)),
+                              ?.copyWith(color: AppColors.textSubtle(context)),
                         ),
                       ],
                     ),
@@ -322,7 +322,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF222222),
+                                        color: AppColors.surface(context),
                                         borderRadius:
                                             BorderRadius.circular(2),
                                       ),
@@ -332,7 +332,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                             .textTheme
                                             .labelSmall
                                             ?.copyWith(
-                                                color: const Color(0xFF777777),
+                                                color: AppColors.textMuted(context),
                                                 letterSpacing: 0.5),
                                       ),
                                     ),
@@ -464,6 +464,7 @@ class _MonthSelector extends StatelessWidget {
     final nextMonth = DateTime(parsed.year, parsed.month + 1);
 
     final months = [prevMonth, parsed, nextMonth];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -491,11 +492,11 @@ class _MonthSelector extends StatelessWidget {
                       ),
                       selected: isActive,
                       onSelected: (_) => onMonthChanged(mStr),
-                      selectedColor: AppColors.paperWhite,
+                      selectedColor: isDark ? AppColors.paperWhite : AppColors.markerBlack,
                       labelStyle: TextStyle(
                         color: isActive
-                            ? AppColors.markerBlack
-                            : const Color(0xFF888888),
+                            ? (isDark ? AppColors.markerBlack : AppColors.paperWhite)
+                            : AppColors.textMuted(context),
                         fontWeight:
                             isActive ? FontWeight.w700 : FontWeight.w400,
                         fontSize: 10,
@@ -539,17 +540,17 @@ class _MonthlySummary extends StatelessWidget {
             Container(
                 width: 1,
                 height: 32,
-                color: const Color(0xFF3A3A3A)),
+                color: AppColors.border(context)),
             _SummaryItem('EXPENSES',
                 Money.format(totals.totalExpensePaise, showDecimal: false),
                 AppColors.tertiary),
             Container(
                 width: 1,
                 height: 32,
-                color: const Color(0xFF3A3A3A)),
+                color: AppColors.border(context)),
             _SummaryItem('BALANCE',
                 Money.format(totals.balancePaise, showDecimal: false),
-                AppColors.paperWhite),
+                AppColors.text(context)),
           ],
         ),
       ),
@@ -572,7 +573,7 @@ class _SummaryItem extends StatelessWidget {
             style: Theme.of(context)
                 .textTheme
                 .labelSmall
-                ?.copyWith(color: const Color(0xFF888888), letterSpacing: 1)),
+                ?.copyWith(color: AppColors.textMuted(context), letterSpacing: 1)),
         const SizedBox(height: 4),
         Text(value,
             style: Theme.of(context)
@@ -602,12 +603,12 @@ class _DateHeader extends StatelessWidget {
                   .textTheme
                   .labelMedium
                   ?.copyWith(
-                      color: const Color(0xFF888888), letterSpacing: 0.8)),
+                      color: AppColors.textMuted(context), letterSpacing: 0.8)),
           Text(Money.format(total, showDecimal: false),
               style: Theme.of(context)
                   .textTheme
                   .labelMedium
-                  ?.copyWith(color: const Color(0xFF555555))),
+                  ?.copyWith(color: AppColors.textSubtle(context))),
         ],
       ),
     );

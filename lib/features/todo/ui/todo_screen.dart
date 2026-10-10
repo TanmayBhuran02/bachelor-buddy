@@ -69,7 +69,7 @@ class TodoScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.checklist, size: 48, color: Color(0xFF3A3A3A)),
+                        Icon(Icons.checklist, size: 48, color: AppColors.border(context)),
                         const SizedBox(height: 16),
                         Text(
                           activeFilter == true
@@ -78,7 +78,7 @@ class TodoScreen extends ConsumerWidget {
                           style: Theme.of(context)
                               .textTheme
                               .titleSmall
-                              ?.copyWith(color: const Color(0xFF888888)),
+                              ?.copyWith(color: AppColors.textMuted(context)),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -86,7 +86,7 @@ class TodoScreen extends ConsumerWidget {
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: const Color(0xFF555555)),
+                              ?.copyWith(color: AppColors.textSubtle(context)),
                         ),
                       ],
                     ),
@@ -130,13 +130,16 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: AppColors.paperWhite,
+      selectedColor: isDark ? AppColors.paperWhite : AppColors.markerBlack,
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.markerBlack : const Color(0xFF888888),
+        color: isSelected
+            ? (isDark ? AppColors.markerBlack : AppColors.paperWhite)
+            : AppColors.textMuted(context),
         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
         fontSize: 10,
         letterSpacing: 0.5,
@@ -226,8 +229,8 @@ class _TodoItemTile extends ConsumerWidget {
                                       ? TextDecoration.lineThrough
                                       : null,
                                   color: todo.isDone
-                                      ? const Color(0xFF555555)
-                                      : AppColors.paperWhite,
+                                      ? AppColors.textSubtle(context)
+                                      : AppColors.text(context),
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -250,7 +253,7 @@ class _TodoItemTile extends ConsumerWidget {
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall
-                            ?.copyWith(color: const Color(0xFF777777)),
+                            ?.copyWith(color: AppColors.textMuted(context)),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -269,19 +272,19 @@ class _TodoItemTile extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF222222),
+                              color: AppColors.surface(context),
                               borderRadius: BorderRadius.circular(2),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.repeat,
-                                    size: 10, color: Color(0xFF777777)),
+                                Icon(Icons.repeat,
+                                    size: 10, color: AppColors.textMuted(context)),
                                 const SizedBox(width: 4),
                                 Text(
                                   todo.recurrence.toUpperCase(),
-                                  style: const TextStyle(
-                                      fontSize: 9, color: Color(0xFF777777), letterSpacing: 0.5),
+                                  style: TextStyle(
+                                      fontSize: 9, color: AppColors.textMuted(context), letterSpacing: 0.5),
                                 ),
                               ],
                             ),
@@ -343,7 +346,7 @@ class _DueBadge extends StatelessWidget {
         ? AppColors.tertiary
         : isToday
             ? AppColors.warning
-            : const Color(0xFF777777);
+            : AppColors.textMuted(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

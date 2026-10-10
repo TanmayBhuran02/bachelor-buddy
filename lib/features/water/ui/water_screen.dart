@@ -70,7 +70,10 @@ class _WaterBody extends ConsumerWidget {
           width: 220,
           height: 220,
           child: CustomPaint(
-            painter: _HydrationRingPainter(progress: status.progress),
+            painter: _HydrationRingPainter(
+              progress: status.progress,
+              trackColor: AppColors.track(context),
+            ),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -81,9 +84,9 @@ class _WaterBody extends ConsumerWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(2),
-                      color: const Color(0xFF1F1F1F),
+                      color: AppColors.surface(context),
                       border: Border.all(
-                        color: const Color(0xFF3A3A3A),
+                        color: AppColors.border(context),
                       ),
                     ),
                     child: const Icon(
@@ -105,7 +108,7 @@ class _WaterBody extends ConsumerWidget {
                               .headlineLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.paperWhite,
+                                color: AppColors.text(context),
                               ),
                         ),
                         TextSpan(
@@ -127,7 +130,7 @@ class _WaterBody extends ConsumerWidget {
                   Text(
                     '/ ${_formatMl(status.goalMl)} ML',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF777777),
+                          color: AppColors.textMuted(context),
                           letterSpacing: 0.5,
                         ),
                   ),
@@ -139,9 +142,9 @@ class _WaterBody extends ConsumerWidget {
                         horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(2),
-                      color: const Color(0xFF1F1F1F),
+                      color: AppColors.surface(context),
                       border: Border.all(
-                        color: const Color(0xFF3A3A3A),
+                        color: AppColors.border(context),
                       ),
                     ),
                     child: Text(
@@ -166,7 +169,7 @@ class _WaterBody extends ConsumerWidget {
         Text(
           '${status.glassesDrank} GLASSES • ${_formatMl(remaining)} ML LEFT',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: const Color(0xFF777777),
+                color: AppColors.textMuted(context),
                 letterSpacing: 0.8,
               ),
         ),
@@ -213,8 +216,12 @@ class _WaterBody extends ConsumerWidget {
 
 class _HydrationRingPainter extends CustomPainter {
   final double progress;
+  final Color trackColor;
 
-  _HydrationRingPainter({required this.progress});
+  _HydrationRingPainter({
+    required this.progress,
+    required this.trackColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -223,9 +230,9 @@ class _HydrationRingPainter extends CustomPainter {
     const strokeWidth = 8.0;
     const startAngle = -math.pi / 2; // 12 o'clock
 
-    // Track ring (raw dark grey)
+    // Track ring
     final trackPaint = Paint()
-      ..color = const Color(0xFF2A2A2A)
+      ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.square;
@@ -248,7 +255,8 @@ class _HydrationRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_HydrationRingPainter old) => old.progress != progress;
+  bool shouldRepaint(_HydrationRingPainter old) =>
+      old.progress != progress || old.trackColor != trackColor;
 }
 
 // ─── Settings Bottom Sheet ─────────────────────────────────────────────────

@@ -103,21 +103,21 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
                     child: Center(
                       child: Column(
                         children: [
-                          const Icon(Icons.lunch_dining,
-                              size: 48, color: Color(0xFF3A3A3A)),
+                          Icon(Icons.lunch_dining,
+                              size: 48, color: AppColors.border(context)),
                           const SizedBox(height: 12),
                           Text(
                             'NO ACTIVE TIFFIN PLANS',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleSmall
-                                ?.copyWith(color: const Color(0xFF888888)),
+                                ?.copyWith(color: AppColors.textMuted(context)),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
+                          Text(
                             'Set up a daily plan from your tiffin vendor to track meal deliveries.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Color(0xFF555555), fontSize: 11),
+                            style: TextStyle(color: AppColors.textSubtle(context), fontSize: 11),
                           ),
                           const SizedBox(height: 16),
                           FilledButton.icon(
@@ -207,7 +207,7 @@ class _TiffinMonthlyCard extends StatelessWidget {
                       'MONTHLY TIFFIN BILL',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             letterSpacing: 1.2,
-                            color: const Color(0xFF777777),
+                            color: AppColors.textMuted(context),
                           ),
                     ),
                     const SizedBox(height: 6),
@@ -226,9 +226,9 @@ class _TiffinMonthlyCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1F1F1F),
+                    color: AppColors.surface(context),
                     borderRadius: BorderRadius.circular(2),
-                    border: Border.all(color: const Color(0xFF3A3A3A)),
+                    border: Border.all(color: AppColors.border(context)),
                   ),
                   child: const Icon(Icons.receipt_long,
                       color: AppColors.kraftBrown, size: 24),
@@ -327,6 +327,8 @@ class _DateStrip extends StatelessWidget {
               day.month == selectedDate.month &&
               day.day == selectedDate.day;
 
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+
           return InkWell(
             borderRadius: BorderRadius.circular(2),
             onTap: () => onSelectDate(day),
@@ -334,13 +336,13 @@ class _DateStrip extends StatelessWidget {
               width: 52,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.paperWhite
-                    : const Color(0xFF1F1F1F),
+                    ? (isDark ? AppColors.paperWhite : AppColors.markerBlack)
+                    : AppColors.surface(context),
                 borderRadius: BorderRadius.circular(2),
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.paperWhite
-                      : const Color(0xFF3A3A3A),
+                      ? (isDark ? AppColors.paperWhite : AppColors.markerBlack)
+                      : AppColors.border(context),
                 ),
               ),
               child: Column(
@@ -352,7 +354,9 @@ class _DateStrip extends StatelessWidget {
                       fontSize: 10,
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.w400,
-                      color: isSelected ? AppColors.markerBlack : const Color(0xFF777777),
+                      color: isSelected
+                          ? (isDark ? AppColors.markerBlack : AppColors.paperWhite)
+                          : AppColors.textMuted(context),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -362,7 +366,9 @@ class _DateStrip extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? AppColors.markerBlack : AppColors.paperWhite,
+                      color: isSelected
+                          ? (isDark ? AppColors.markerBlack : AppColors.paperWhite)
+                          : AppColors.text(context),
                     ),
                   ),
                 ],
@@ -424,9 +430,9 @@ class _TiffinMealCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1F1F1F),
+                    color: AppColors.surface(context),
                     borderRadius: BorderRadius.circular(2),
-                    border: Border.all(color: const Color(0xFF3A3A3A)),
+                    border: Border.all(color: AppColors.border(context)),
                   ),
                   child: Icon(
                     plan.mealType == 'dinner'
@@ -455,7 +461,7 @@ class _TiffinMealCard extends ConsumerWidget {
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall
-                            ?.copyWith(color: const Color(0xFF777777)),
+                            ?.copyWith(color: AppColors.textMuted(context)),
                       ),
                     ],
                   ),

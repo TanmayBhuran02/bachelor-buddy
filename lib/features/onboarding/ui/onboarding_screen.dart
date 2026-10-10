@@ -66,8 +66,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.all(16),
                 child: TextButton(
                   onPressed: () => _finishOnboarding(context),
-                  child: const Text('SKIP',
-                      style: TextStyle(color: Color(0xFF777777), letterSpacing: 1)),
+                  child: Text('SKIP',
+                      style: TextStyle(color: AppColors.textMuted(context), letterSpacing: 1)),
                 ),
               ),
             ),
@@ -91,9 +91,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           width: 100,
                           height: 100,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1F1F1F),
+                            color: AppColors.surface(context),
                             borderRadius: BorderRadius.circular(2),
-                            border: Border.all(color: const Color(0xFF3A3A3A)),
+                            border: Border.all(color: AppColors.border(context)),
                           ),
                           child: Icon(data.icon,
                               size: 48, color: data.iconColor),
@@ -114,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
-                              ?.copyWith(color: const Color(0xFF888888), height: 1.5),
+                              ?.copyWith(color: AppColors.textMuted(context), height: 1.5),
                         ),
                       ],
                     ),
@@ -139,8 +139,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         height: 4,
                         decoration: BoxDecoration(
                           color: _currentPage == i
-                              ? AppColors.paperWhite
-                              : const Color(0xFF3A3A3A),
+                              ? (Theme.of(context).brightness == Brightness.dark
+                                  ? AppColors.paperWhite
+                                  : AppColors.markerBlack)
+                              : AppColors.border(context),
                           borderRadius: BorderRadius.circular(1),
                         ),
                       ),
