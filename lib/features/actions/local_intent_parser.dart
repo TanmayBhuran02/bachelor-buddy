@@ -2,6 +2,7 @@
 /// Detects expense-related intents from to-do titles.
 library;
 
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/money.dart';
 import 'action_intent.dart';
 
@@ -62,6 +63,11 @@ class LocalIntentParser implements IntentParser {
 
     // Try to extract an amount
     final amountPaise = Money.extractFromText(todoText);
+
+    AppLogger.info(
+      'Parsed task intent for "$todoText": category=$matchedCategory, amountPaise=$amountPaise',
+      context: 'ActionPipeline',
+    );
 
     return ActionIntent(
       type: 'create_expense',

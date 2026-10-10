@@ -7,6 +7,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
 import 'package:bachelor_buddy/core/notifications/notification_service.dart';
 import 'package:bachelor_buddy/features/actions/action_intent.dart';
@@ -98,6 +99,10 @@ class TodoRepository {
     }
 
     _eventBus.fire(TodoCreated(todoId: id, title: title));
+    AppLogger.info(
+      'Todo action: Created todo $id "$title" (due: $dueAt, action: ${actionIntent?.type})',
+      context: 'Todo',
+    );
     return id;
   }
 
@@ -130,6 +135,11 @@ class TodoRepository {
     } else {
       await NotificationService().cancel(notifId);
     }
+
+    AppLogger.info(
+      'Todo action: Updated todo $id "$title" (due: $dueAt, priority: $priority, recurrence: $recurrence)',
+      context: 'Todo',
+    );
   }
 
   /// Toggle completion of a todo.
@@ -183,6 +193,11 @@ class TodoRepository {
       );
     }
 
+    AppLogger.info(
+      'Todo action: Toggled todo "${todo.title}" ($id) -> isDone=$newStatus (actionType: ${todo.actionType})',
+      context: 'Todo',
+    );
+
     return true;
   }
 
@@ -226,6 +241,10 @@ class TodoRepository {
         );
 
     _eventBus.fire(TodoCreated(todoId: newId, title: parent.title));
+    AppLogger.info(
+      'Todo action: Generated recurring occurrence $newId for "${parent.title}" at $nextDueDate',
+      context: 'Todo',
+    );
   }
 
   /// Update action status (confirmed / dismissed)
@@ -233,11 +252,19 @@ class TodoRepository {
     await (_db.update(_db.todos)..where((t) => t.id.equals(id))).write(
       TodosCompanion(actionStatus: Value(status)),
     );
+    AppLogger.info(
+      'Todo action: Updated action status for todo $id -> $status',
+      context: 'Todo',
+    );
   }
 
   /// Delete a todo
   Future<void> deleteTodo(String id) async {
     await NotificationService().cancel(NotificationService.hashId(id, 40000));
     await (_db.delete(_db.todos)..where((t) => t.id.equals(id))).go();
+    AppLogger.info(
+      'Todo action: Deleted todo $id',
+      context: 'Todo',
+    );
   }
 }

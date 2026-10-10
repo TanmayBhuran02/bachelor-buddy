@@ -7,6 +7,7 @@ import 'package:stream_transform/stream_transform.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
 import 'package:bachelor_buddy/core/notifications/notification_preferences.dart';
 import 'package:bachelor_buddy/core/notifications/notification_scheduler.dart';
@@ -159,11 +160,20 @@ class WaterRepository {
       dailyTotalMl: todayTotal,
       goalMl: settings.dailyGoalMl,
     ));
+
+    AppLogger.info(
+      'Water action: Added +${amountMl}ml (today total: ${todayTotal}ml / ${settings.dailyGoalMl}ml)',
+      context: 'Water',
+    );
   }
 
   /// Delete a water log entry
   Future<void> deleteWaterLog(String id) async {
     await (_db.delete(_db.waterLogs)..where((l) => l.id.equals(id))).go();
+    AppLogger.info(
+      'Water action: Deleted water log $id',
+      context: 'Water',
+    );
   }
 
   /// Update settings
@@ -188,5 +198,10 @@ class WaterRepository {
 
     final prefs = await NotificationPreferences.load(_db);
     await NotificationScheduler.syncAllReminders(_db, prefs);
+
+    AppLogger.info(
+      'Water action: Updated settings (goal: ${dailyGoalMl}ml, interval: ${reminderIntervalMin}m, reminders: $remindersEnabled)',
+      context: 'Water',
+    );
   }
 }

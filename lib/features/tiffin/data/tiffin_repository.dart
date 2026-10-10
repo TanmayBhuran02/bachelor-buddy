@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
 import 'package:bachelor_buddy/core/notifications/notification_preferences.dart';
 import 'package:bachelor_buddy/core/notifications/notification_scheduler.dart';
@@ -140,6 +141,12 @@ class TiffinRepository {
 
     final prefs = await NotificationPreferences.load(_db);
     await NotificationScheduler.syncAllReminders(_db, prefs);
+
+    AppLogger.info(
+      'Tiffin action: Created plan $id for "$providerName" ($mealType, ₹${pricePerTiffinPaise ~/ 100})',
+      context: 'Tiffin',
+    );
+
     return id;
   }
 
@@ -164,6 +171,11 @@ class TiffinRepository {
 
     final prefs = await NotificationPreferences.load(_db);
     await NotificationScheduler.syncAllReminders(_db, prefs);
+
+    AppLogger.info(
+      'Tiffin action: Updated plan $id for "$providerName" ($mealType, ₹${pricePerTiffinPaise ~/ 100})',
+      context: 'Tiffin',
+    );
   }
 
   /// Mark tiffin as received for a given date
@@ -259,6 +271,11 @@ class TiffinRepository {
       pricePaise: price,
       mealType: plan.mealType,
     ));
+
+    AppLogger.info(
+      'Tiffin action: Marked meal received for plan $planId on $date (${plan.mealType}, ₹${price ~/ 100})',
+      context: 'Tiffin',
+    );
   }
 
   /// Mark tiffin as skipped for a given date
@@ -296,6 +313,11 @@ class TiffinRepository {
     }
 
     _eventBus.fire(TiffinSkipped(planId: planId, date: date));
+
+    AppLogger.info(
+      'Tiffin action: Marked meal skipped for plan $planId on $date',
+      context: 'Tiffin',
+    );
   }
 
   /// Deactivate a plan
@@ -303,6 +325,10 @@ class TiffinRepository {
     await NotificationService().cancel(NotificationService.hashId(id, 20000));
     await (_db.update(_db.tiffinPlans)..where((p) => p.id.equals(id))).write(
       const TiffinPlansCompanion(isActive: Value(false)),
+    );
+    AppLogger.info(
+      'Tiffin action: Deactivated tiffin plan $id',
+      context: 'Tiffin',
     );
   }
 }

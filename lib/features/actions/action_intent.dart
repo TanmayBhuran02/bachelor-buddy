@@ -3,6 +3,7 @@
 library;
 
 import 'dart:convert';
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 
 // ─── Action Intent ─────────────────────────────────────────────────────────
 
@@ -42,12 +43,14 @@ abstract class ActionHandler {
   Future<void> execute(ActionIntent intent);
 }
 
+
 // ─── Action Registry ───────────────────────────────────────────────────────
 
 class ActionRegistry {
   final Map<String, ActionHandler> _handlers = {};
 
   void register(ActionHandler handler) {
+    AppLogger.info('Registered handler for action type: ${handler.type}', context: 'ActionRegistry');
     _handlers[handler.type] = handler;
   }
 

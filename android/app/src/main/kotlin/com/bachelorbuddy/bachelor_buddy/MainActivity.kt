@@ -29,6 +29,16 @@ class MainActivity : FlutterFragmentActivity() {
                     startActivity(intent)
                     result.success(true)
                 }
+                "updateMonitoredPackages" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    val packages = call.argument<List<String>>("packages") ?: emptyList()
+                    TransactionNotificationService.updateConfiguration(
+                        this,
+                        enabled,
+                        packages.toSet()
+                    )
+                    result.success(true)
+                }
                 else -> result.notImplemented()
             }
         }

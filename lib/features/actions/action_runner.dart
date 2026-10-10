@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
 import 'action_intent.dart';
 
@@ -21,8 +22,14 @@ class ActionRunner {
     _sub = eventBus.on<TodoCompleted>().listen((event) {
       if (event.actionType != null && event.actionPayloadJson != null) {
         _handleTodoAction(event);
+      } else {
+        AppLogger.info(
+          'Todo completed without automated action: "${event.title}"',
+          context: 'ActionRunner',
+        );
       }
     });
+    AppLogger.info('ActionRunner listening for task actions', context: 'ActionRunner');
   }
 
   void dispose() {
@@ -31,14 +38,30 @@ class ActionRunner {
 
   Future<void> _handleTodoAction(TodoCompleted event) async {
     final handler = registry.of(event.actionType!);
-    if (handler == null) return;
+    if (handler == null) {
+      AppLogger.warn(
+        'No handler registered for action type: ${event.actionType}',
+        context: 'ActionRunner',
+      );
+      return;
+    }
 
     try {
+      AppLogger.info(
+        'Executing action "${event.actionType}" for todo "${event.title}"',
+        context: 'ActionRunner',
+      );
       final intent = ActionIntent.fromJsonString(event.actionPayloadJson!);
       await handler.execute(intent);
-    } catch (e) {
-      // Log error but don't crash — action failures shouldn't block todo completion
-      // In production, this would go to the diagnostics log
+      AppLogger.info(
+        'Successfully completed action "${event.actionType}" for "${event.title}"',
+        context: 'ActionRunner',
+      );
+    } catch (e, stack) {
+      AppLogger.error(
+        'Action "${event.actionType}" failed: $e\n$stack',
+        context: 'ActionRunner',
+      );
     }
   }
 }

@@ -32,6 +32,10 @@ class NotificationScheduler {
 
     // Initial sync
     await syncAllReminders(db, prefs);
+    await NotificationPreferences.syncNativeMonitoredPackages(
+      prefs.notifyTxnListener,
+      prefs.enabledTxnPackages,
+    );
 
     if (!_listenersAttached) {
       _listenersAttached = true;
@@ -257,10 +261,19 @@ class NotificationScheduler {
           final text = args['text']?.toString() ?? '';
 
           final prefs = await NotificationPreferences.load(db);
-          if (!prefs.notifyTxnListener) return;
+          if (!prefs.notifyTxnListener) {
+            return;
+          }
 
           // Check if package is enabled
-          if (!prefs.enabledTxnPackages.contains(packageName)) return;
+          if (!prefs.enabledTxnPackages.contains(packageName)) {
+            return;
+          }
+
+          AppLogger.info(
+            'Received notification from monitored app: $packageName',
+            context: 'TxnListener',
+          );
 
           // Parse transaction
           final parsed = TxnParser.parse(
@@ -268,78 +281,96 @@ class NotificationScheduler {
             packageName: packageName,
           );
 
-          if (parsed != null && parsed.amountPaise > 0) {
-            // Find appropriate category for kind
-            final categories = await (db.select(db.categories)
-                  ..where((c) => c.kind.equals(parsed.type)))
-                .get();
-
-            String categoryId;
-            if (categories.isNotEmpty) {
-              final match = categories.firstWhere(
-                (c) => c.name.toLowerCase().contains('other'),
-                orElse: () => categories.first,
-              );
-              categoryId = match.id;
-            } else {
-              final anyCat =
-                  await (db.select(db.categories)..limit(1)).getSingleOrNull();
-              categoryId = anyCat?.id ?? 'default';
-            }
-
-            final txId = const Uuid().v4();
-            final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-            // Auto-insert into database
-            await db.into(db.transactions).insert(
-                  TransactionsCompanion.insert(
-                    id: txId,
-                    amountPaise: parsed.amountPaise,
-                    type: parsed.type,
-                    categoryId: categoryId,
-                    note: Value('${parsed.merchantOrParty} (${parsed.appSource})'),
-                    date: todayStr,
-                    source: const Value('auto_detected'),
-                    createdAt: DateTime.now().toUtc().millisecondsSinceEpoch,
-                  ),
-                );
-
-            // Fire event to update widgets, budget totals, and lists
-            eventBus.fire(TransactionCreated(
-              transactionId: txId,
-              amountPaise: parsed.amountPaise,
-              type: parsed.type,
-              categoryId: categoryId,
-              date: todayStr,
-              source: 'auto_detected',
-            ));
-
-            final notifService = NotificationService();
-            final id = NotificationService.hashId(
-              '${parsed.amountPaise}-${DateTime.now().millisecondsSinceEpoch}',
-              80000,
-            );
-
-            final actionText =
-                parsed.type == 'expense' ? 'Expense' : 'Income';
-
-            await notifService.showTxnDetectedNotification(
-              id: id,
-              title:
-                  '⚡ Auto-Added $actionText: ${Money.format(parsed.amountPaise, showDecimal: false)} (${parsed.appSource})',
-              body:
-                  '${parsed.merchantOrParty} • Recorded in expenses. Tap to view.',
-              payload: 'txn_recorded:$txId',
-            );
-
+          if (parsed == null || parsed.amountPaise <= 0) {
             AppLogger.info(
-              'Auto-inserted transaction $txId: ${parsed.amountPaise} from ${parsed.appSource}',
-              context: 'Notification',
+              'Ignored: text from $packageName did not match any transaction format',
+              context: 'TxnListener',
             );
+            return;
           }
-        } catch (e) {
-          AppLogger.error('Error handling incoming txn notification: $e',
-              context: 'Notification');
+
+          AppLogger.info(
+            'Parsed ${parsed.type}: ${Money.format(parsed.amountPaise, showDecimal: false)} for "${parsed.merchantOrParty}" via ${parsed.appSource}',
+            context: 'TxnListener',
+          );
+
+          // Find appropriate category for kind
+          final categories = await (db.select(db.categories)
+                ..where((c) => c.kind.equals(parsed.type)))
+              .get();
+
+          String categoryId;
+          if (categories.isNotEmpty) {
+            final match = categories.firstWhere(
+              (c) => c.name.toLowerCase().contains('other'),
+              orElse: () => categories.first,
+            );
+            categoryId = match.id;
+          } else {
+            final anyCat =
+                await (db.select(db.categories)..limit(1)).getSingleOrNull();
+            categoryId = anyCat?.id ?? 'default';
+          }
+
+          final txId = const Uuid().v4();
+          final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+          // Auto-insert into database
+          await db.into(db.transactions).insert(
+                TransactionsCompanion.insert(
+                  id: txId,
+                  amountPaise: parsed.amountPaise,
+                  type: parsed.type,
+                  categoryId: categoryId,
+                  note: Value('${parsed.merchantOrParty} (${parsed.appSource})'),
+                  date: todayStr,
+                  source: const Value('auto_detected'),
+                  createdAt: DateTime.now().toUtc().millisecondsSinceEpoch,
+                ),
+              );
+
+          AppLogger.info(
+            'Inserted transaction $txId into database under category $categoryId',
+            context: 'TxnListener',
+          );
+
+          // Fire event to update widgets, budget totals, and lists
+          eventBus.fire(TransactionCreated(
+            transactionId: txId,
+            amountPaise: parsed.amountPaise,
+            type: parsed.type,
+            categoryId: categoryId,
+            date: todayStr,
+            source: 'auto_detected',
+          ));
+
+          final notifService = NotificationService();
+          final id = NotificationService.hashId(
+            '${parsed.amountPaise}-${DateTime.now().millisecondsSinceEpoch}',
+            80000,
+          );
+
+          final actionText =
+              parsed.type == 'expense' ? 'Expense' : 'Income';
+
+          await notifService.showTxnDetectedNotification(
+            id: id,
+            title:
+                '⚡ Auto-Added $actionText: ${Money.format(parsed.amountPaise, showDecimal: false)} (${parsed.appSource})',
+            body:
+                '${parsed.merchantOrParty} • Recorded in expenses. Tap to view.',
+            payload: 'txn_recorded:$txId',
+          );
+
+          AppLogger.info(
+            'Auto-recorded transaction $txId: ${parsed.amountPaise} paise from ${parsed.appSource}',
+            context: 'TxnListener',
+          );
+        } catch (e, stack) {
+          AppLogger.error(
+            'Error handling incoming txn notification: $e\n$stack',
+            context: 'TxnListener',
+          );
         }
       }
     });

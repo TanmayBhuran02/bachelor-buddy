@@ -180,5 +180,35 @@ class NotificationPreferences {
             value: jsonEncode(prefs.enabledTxnPackages.toList()),
           ),
         );
+
+    // Sync directly to Kotlin service
+    await syncNativeMonitoredPackages(
+      prefs.notifyTxnListener,
+      prefs.enabledTxnPackages,
+    );
+
+    AppLogger.info(
+      'Notification action: Saved preferences (water: ${prefs.notifyWater}, tiffin: ${prefs.notifyTiffin}, todo: ${prefs.notifyTodo}, budget: ${prefs.notifyBudget}, txn: ${prefs.notifyTxnListener}, enabledApps: ${prefs.enabledTxnPackages.length})',
+      context: 'Notifications',
+    );
+  }
+
+  /// Sync monitored package whitelist to native Android service
+  static Future<void> syncNativeMonitoredPackages(
+    bool enabled,
+    Set<String> packages,
+  ) async {
+    try {
+      await _platform.invokeMethod('updateMonitoredPackages', {
+        'enabled': enabled,
+        'packages': packages.toList(),
+      });
+      AppLogger.info(
+        'Notification action: Synced native package whitelist (enabled: $enabled, ${packages.length} apps)',
+        context: 'Notifications',
+      );
+    } catch (e) {
+      AppLogger.warn('Failed to sync monitored packages to native: $e');
+    }
   }
 }

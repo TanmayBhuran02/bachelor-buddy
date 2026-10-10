@@ -6,6 +6,7 @@ import 'package:stream_transform/stream_transform.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/features/expenses/data/expense_repository.dart';
 
 const _uuid = Uuid();
@@ -154,6 +155,11 @@ class BudgetRepository {
             ),
           );
     }
+
+    AppLogger.info(
+      'Budget action: Set budget limit for $month (cat: $categoryId) to ₹${limitPaise ~/ 100}',
+      context: 'Budget',
+    );
   }
 
   /// Watch recurring expenses
@@ -181,6 +187,12 @@ class BudgetRepository {
             isActive: const Value(true),
           ),
         );
+
+    AppLogger.info(
+      'Budget action: Added recurring expense $id "$title" (₹${amountPaise ~/ 100}, day $dayOfMonth)',
+      context: 'Budget',
+    );
+
     return id;
   }
 
@@ -188,6 +200,10 @@ class BudgetRepository {
   Future<void> deleteRecurringExpense(String id) async {
     await (_db.delete(_db.recurringExpenses)..where((r) => r.id.equals(id)))
         .go();
+    AppLogger.info(
+      'Budget action: Deleted recurring expense $id',
+      context: 'Budget',
+    );
   }
 
   /// Process recurring expenses for current month
@@ -218,6 +234,11 @@ class BudgetRepository {
           RecurringExpensesCompanion(
             lastGeneratedMonth: Value(currentMonth),
           ),
+        );
+
+        AppLogger.info(
+          'Budget action: Auto-generated recurring expense "${rec.title}" (₹${rec.amountPaise ~/ 100}) for $currentMonth',
+          context: 'Budget',
         );
       }
     }

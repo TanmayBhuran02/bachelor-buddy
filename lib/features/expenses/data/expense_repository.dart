@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
 
 const _uuid = Uuid();
@@ -152,6 +153,11 @@ class ExpenseRepository {
       source: source,
     ));
 
+    AppLogger.info(
+      'Expense action: Added $type tx $id: ₹${amountPaise ~/ 100} (cat: $categoryId, source: $source, note: "$note")',
+      context: 'Expense',
+    );
+
     return id;
   }
 
@@ -183,6 +189,11 @@ class ExpenseRepository {
       categoryId: categoryId,
       date: date,
     ));
+
+    AppLogger.info(
+      'Expense action: Updated tx $id: $type ₹${amountPaise ~/ 100} (cat: $categoryId, note: "$note")',
+      context: 'Expense',
+    );
   }
 
   /// Delete a transaction
@@ -199,6 +210,11 @@ class ExpenseRepository {
       categoryId: existing.categoryId,
       date: existing.date,
     ));
+
+    AppLogger.info(
+      'Expense action: Deleted tx $id (${existing.type} ₹${existing.amountPaise ~/ 100})',
+      context: 'Expense',
+    );
   }
 
   /// Add custom category
@@ -219,6 +235,12 @@ class ExpenseRepository {
             isDefault: const Value(false),
           ),
         );
+
+    AppLogger.info(
+      'Expense action: Added category $id "$name" ($kind)',
+      context: 'Expense',
+    );
+
     return id;
   }
 }

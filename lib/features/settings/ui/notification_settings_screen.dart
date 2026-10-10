@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/theme/app_theme.dart';
 import 'package:bachelor_buddy/core/notifications/notification_preferences.dart';
 import 'package:bachelor_buddy/core/notifications/notification_scheduler.dart';
@@ -270,6 +271,7 @@ class _NotificationSettingsScreenState
                     icon: const Icon(Icons.notifications_active_outlined),
                     label: const Text('Test (Now)'),
                     onPressed: () async {
+                      AppLogger.info('Triggered manual immediate test notification', context: 'Notifications');
                       final notifService = NotificationService();
                       await notifService.showBudgetAlert(
                         id: 9999,
@@ -290,6 +292,7 @@ class _NotificationSettingsScreenState
                     icon: const Icon(Icons.timer_outlined),
                     label: const Text('Test (in 5s)'),
                     onPressed: () async {
+                      AppLogger.info('Triggered manual scheduled test reminder (5s)', context: 'Notifications');
                       final notifService = NotificationService();
                       final testTime =
                           DateTime.now().add(const Duration(seconds: 5));
