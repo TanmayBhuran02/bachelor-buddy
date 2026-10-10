@@ -13,6 +13,7 @@ import 'package:bachelor_buddy/core/theme/app_theme.dart';
 import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/db/app_database.dart';
 import 'package:bachelor_buddy/core/security/biometric_service.dart';
+import 'package:bachelor_buddy/shared/logo_icon.dart';
 import 'package:bachelor_buddy/providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -136,9 +137,9 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _showLogsSheet(context),
           ),
           ListTile(
-            leading: const Icon(Icons.info_outline),
+            leading: const BachelorBuddyLogoIcon(size: 28),
             title: const Text('About Bachelor Buddy'),
-            subtitle: const Text('v1.0.0 • Offline-first personal manager'),
+            subtitle: const Text('v1.0.0 • Offline-first bachelor companion'),
           ),
         ],
       ),

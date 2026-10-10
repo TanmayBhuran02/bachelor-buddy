@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:fillColor="#1A1A1A"
+      android:pathData="M0,0h108v108h-108z"/>
+  <!-- Central Mark shrunk to 44dp x 44dp centered at (54, 54) to fit well within Android 66dp safe circular mask -->
+  <!-- Equal 32dp padding on all 4 sides: X: [32, 76], Y: [32, 76] -->
+  <!-- House base silhouette in warm cream #FFFEEF -->
+  <path
+      android:fillColor="#FFFEEF"
+      android:pathData="M54,32 L76,43.27 L76,72.08 C76,74.25 74.25,76 72.08,76 L35.92,76 C33.75,76 32,74.25 32,72.08 L32,43.27 Z"/>
+  <!-- B top bowl cutout in dark ink #1A1A1A -->
+  <path
+      android:fillColor="#1A1A1A"
+      android:pathData="M43,50.86 L58.4,50.86 C62.8,50.86 65.62,53.22 65.62,56.52 C65.62,59.82 62.8,62.18 58.4,62.18 L43,62.18 Z M48.97,54.95 L56.83,54.95 C58.87,54.95 60.28,55.74 60.28,56.52 C60.28,57.31 58.87,58.1 56.83,58.1 L48.97,58.1 Z"/>
+  <!-- B bottom bowl cutout in dark ink #1A1A1A -->
+  <path
+      android:fillColor="#1A1A1A"
+      android:pathData="M43,63.44 L59.97,63.44 C64.68,63.44 67.82,66.11 67.82,69.73 C67.82,73.35 64.68,76 59.97,76 L43,76 Z M48.97,67.68 L57.77,67.68 C60.13,67.68 61.85,68.62 61.85,69.73 C61.85,70.83 60.13,71.77 57.77,71.77 L48.97,71.77 Z"/>
+  <!-- Chimney cutout in dark ink #1A1A1A -->
+  <path
+      android:fillColor="#1A1A1A"
+      android:pathData="M62.16,35.93 L66.24,35.93 L66.24,42.53 L62.16,42.53 Z"/>
+</vector>

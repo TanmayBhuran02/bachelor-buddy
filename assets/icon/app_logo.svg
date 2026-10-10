@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="100" fill="#1A1A1A"/>
+  <!-- Central Mark: Shrunk to 210x210 mark with 151px padding on all sides to fit well inside any circular/squircle mask -->
+  <g transform="translate(256, 256) scale(0.75)">
+    <!-- Main outer house/badge silhouette -->
+    <path d="M 0 -140 L 140 -20 L 140 115 C 140 128.8 128.8 140 115 140 L -115 140 C -128.8 140 -140 128.8 -140 115 L -140 -20 Z" fill="#FFFEEF"/>
+    <!-- Negative space cutouts in #1A1A1A creating letter 'B' & keyhole/living portal inside house -->
+    <!-- Top bowl of B -->
+    <path d="M -70 -20 L 28 -20 C 56 -20 74 -5 74 16 C 74 37 56 52 28 52 L -70 52 Z M -32 6 L 18 6 C 31 6 40 11 40 16 C 40 21 31 26 18 26 L -32 26 Z" fill="#1A1A1A"/>
+    <!-- Bottom bowl of B + Doorway / Keyhole arch cutout -->
+    <path d="M -70 60 L 38 60 C 68 60 88 77 88 100 C 88 123 68 140 38 140 L -70 140 Z M -32 87 L 24 87 C 39 87 50 93 50 100 C 50 107 39 113 24 113 L -32 113 Z" fill="#1A1A1A"/>
+    <!-- Architectural roof chimney detail -->
+    <rect x="52" y="-115" width="26" height="42" rx="3" fill="#1A1A1A"/>
+  </g>
+</svg>
