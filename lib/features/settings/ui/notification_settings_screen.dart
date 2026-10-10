@@ -260,25 +260,57 @@ class _NotificationSettingsScreenState
 
           const Divider(height: 32),
 
-          // Test notification button
+          // Test notification buttons
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.notifications_active_outlined),
-              label: const Text('Send Test Notification'),
-              onPressed: () async {
-                final notifService = NotificationService();
-                await notifService.showBudgetAlert(
-                  id: 9999,
-                  title: '🔔 Test Notification',
-                  body: 'Bachelor Buddy notifications are working properly!',
-                );
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Test notification sent!')),
-                  );
-                }
-              },
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.notifications_active_outlined),
+                    label: const Text('Test (Now)'),
+                    onPressed: () async {
+                      final notifService = NotificationService();
+                      await notifService.showBudgetAlert(
+                        id: 9999,
+                        title: '🔔 Immediate Test',
+                        body: 'Bachelor Buddy immediate notifications are active!',
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Immediate test notification sent!')),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.timer_outlined),
+                    label: const Text('Test (in 5s)'),
+                    onPressed: () async {
+                      final notifService = NotificationService();
+                      final testTime =
+                          DateTime.now().add(const Duration(seconds: 5));
+                      await notifService.scheduleTodoReminder(
+                        id: 9998,
+                        title: 'Scheduled Test Reminder',
+                        dueAt: testTime,
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Scheduled reminder set for 5s from now!',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),

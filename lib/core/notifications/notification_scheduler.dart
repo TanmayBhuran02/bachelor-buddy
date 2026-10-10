@@ -2,7 +2,6 @@
 /// NotificationService, and incoming native transaction broadcasts.
 library;
 
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:drift/drift.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +12,7 @@ import 'package:bachelor_buddy/core/events/domain_event.dart';
 import 'package:bachelor_buddy/core/money.dart';
 import 'package:bachelor_buddy/core/notifications/notification_preferences.dart';
 import 'package:bachelor_buddy/core/notifications/notification_service.dart';
+import 'package:uuid/uuid.dart';
 import 'package:bachelor_buddy/features/expenses/data/txn_parser.dart';
 
 class NotificationScheduler {
@@ -36,7 +36,7 @@ class NotificationScheduler {
     if (!_listenersAttached) {
       _listenersAttached = true;
       _listenToDomainEvents(db, eventBus);
-      _listenToNativeTxnBroadcasts(db);
+      _listenToNativeTxnBroadcasts(db, eventBus);
     }
 
     AppLogger.info('NotificationScheduler initialized', context: 'Notification');
@@ -247,8 +247,8 @@ class NotificationScheduler {
     }
   }
 
-  /// Listen to native transaction broadcasts from TransactionNotificationService
-  static void _listenToNativeTxnBroadcasts(AppDatabase db) {
+  /// Listen to native transaction broadcasts and automatically record into database
+  static void _listenToNativeTxnBroadcasts(AppDatabase db, EventBus eventBus) {
     _txnChannel.setMethodCallHandler((call) async {
       if (call.method == 'onNotificationReceived') {
         try {
@@ -269,6 +269,51 @@ class NotificationScheduler {
           );
 
           if (parsed != null && parsed.amountPaise > 0) {
+            // Find appropriate category for kind
+            final categories = await (db.select(db.categories)
+                  ..where((c) => c.kind.equals(parsed.type)))
+                .get();
+
+            String categoryId;
+            if (categories.isNotEmpty) {
+              final match = categories.firstWhere(
+                (c) => c.name.toLowerCase().contains('other'),
+                orElse: () => categories.first,
+              );
+              categoryId = match.id;
+            } else {
+              final anyCat =
+                  await (db.select(db.categories)..limit(1)).getSingleOrNull();
+              categoryId = anyCat?.id ?? 'default';
+            }
+
+            final txId = const Uuid().v4();
+            final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+            // Auto-insert into database
+            await db.into(db.transactions).insert(
+                  TransactionsCompanion.insert(
+                    id: txId,
+                    amountPaise: parsed.amountPaise,
+                    type: parsed.type,
+                    categoryId: categoryId,
+                    note: Value('${parsed.merchantOrParty} (${parsed.appSource})'),
+                    date: todayStr,
+                    source: const Value('auto_detected'),
+                    createdAt: DateTime.now().toUtc().millisecondsSinceEpoch,
+                  ),
+                );
+
+            // Fire event to update widgets, budget totals, and lists
+            eventBus.fire(TransactionCreated(
+              transactionId: txId,
+              amountPaise: parsed.amountPaise,
+              type: parsed.type,
+              categoryId: categoryId,
+              date: todayStr,
+              source: 'auto_detected',
+            ));
+
             final notifService = NotificationService();
             final id = NotificationService.hashId(
               '${parsed.amountPaise}-${DateTime.now().millisecondsSinceEpoch}',
@@ -276,24 +321,19 @@ class NotificationScheduler {
             );
 
             final actionText =
-                parsed.type == 'expense' ? 'Spent' : 'Received';
+                parsed.type == 'expense' ? 'Expense' : 'Income';
 
             await notifService.showTxnDetectedNotification(
               id: id,
               title:
-                  '⚡ $actionText ${Money.format(parsed.amountPaise, showDecimal: false)} (${parsed.appSource})',
+                  '⚡ Auto-Added $actionText: ${Money.format(parsed.amountPaise, showDecimal: false)} (${parsed.appSource})',
               body:
-                  '${parsed.merchantOrParty} • Tap to confirm & record in Bachelor Buddy',
-              payload: jsonEncode({
-                'amountPaise': parsed.amountPaise,
-                'type': parsed.type,
-                'merchant': parsed.merchantOrParty,
-                'source': parsed.appSource,
-              }),
+                  '${parsed.merchantOrParty} • Recorded in expenses. Tap to view.',
+              payload: 'txn_recorded:$txId',
             );
 
             AppLogger.info(
-              'Auto-detected transaction: ${parsed.amountPaise} from ${parsed.appSource}',
+              'Auto-inserted transaction $txId: ${parsed.amountPaise} from ${parsed.appSource}',
               context: 'Notification',
             );
           }

@@ -7,7 +7,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:go_router/go_router.dart';
 import 'package:bachelor_buddy/core/diagnostics/logger.dart';
+import 'package:bachelor_buddy/router.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -38,9 +40,19 @@ class NotificationService {
     try {
       final timeZoneInfo = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(timeZoneInfo));
+      AppLogger.info('Timezone configured: $timeZoneInfo', context: 'Notification');
     } catch (e) {
-      AppLogger.warn('Failed to get local timezone, falling back to UTC: $e');
-      tz.setLocalLocation(tz.UTC);
+      AppLogger.warn('Failed to get local timezone from system: $e', context: 'Notification');
+      try {
+        final offset = DateTime.now().timeZoneOffset;
+        if (offset.inHours == 5 && offset.inMinutes % 60 == 30) {
+          tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
+        } else {
+          tz.setLocalLocation(tz.getLocation(DateTime.now().timeZoneName));
+        }
+      } catch (_) {
+        tz.setLocalLocation(tz.UTC);
+      }
     }
 
     const androidSettings =
@@ -64,6 +76,8 @@ class NotificationService {
           'Tiffin Reminders',
           description: 'Daily meal reminders and confirmations',
           importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
         ),
       );
       await androidImplementation.createNotificationChannel(
@@ -72,6 +86,8 @@ class NotificationService {
           'Water Reminders',
           description: 'Hydration reminders during active hours',
           importance: Importance.defaultImportance,
+          playSound: true,
+          enableVibration: true,
         ),
       );
       await androidImplementation.createNotificationChannel(
@@ -80,6 +96,8 @@ class NotificationService {
           'Task Reminders',
           description: 'Reminders for scheduled to-do items',
           importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
         ),
       );
       await androidImplementation.createNotificationChannel(
@@ -88,6 +106,8 @@ class NotificationService {
           'Budget & Bill Alerts',
           description: 'Monthly budget warnings and bill due alerts',
           importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
         ),
       );
       await androidImplementation.createNotificationChannel(
@@ -96,7 +116,19 @@ class NotificationService {
           'Transaction Detected',
           description: 'Auto-detected expense confirmations',
           importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
         ),
+      );
+    }
+
+    // Check if app was launched from a notification
+    final launchDetails = await _plugin.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp ?? false) {
+      pendingPayload = launchDetails?.notificationResponse?.payload;
+      AppLogger.info(
+        'App launched from notification payload: $pendingPayload',
+        context: 'Notification',
       );
     }
 
@@ -104,20 +136,77 @@ class NotificationService {
     AppLogger.info('NotificationService initialized', context: 'Notification');
   }
 
+  static String? pendingPayload;
+
+  /// Route to appropriate screen based on notification payload
+  static void handlePayload(String? payload) {
+    if (payload == null || payload.trim().isEmpty) return;
+    AppLogger.info('Routing payload: $payload', context: 'Notification');
+
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) {
+      pendingPayload = payload;
+      return;
+    }
+
+    try {
+      if (payload.startsWith('todo:')) {
+        context.go('/todo');
+      } else if (payload.startsWith('water:')) {
+        context.go('/water');
+      } else if (payload.startsWith('tiffin:')) {
+        context.go('/tiffin');
+      } else if (payload.startsWith('budget:')) {
+        context.go('/budget');
+      } else if (payload.startsWith('txn_recorded:')) {
+        final txId = payload.replaceFirst('txn_recorded:', '');
+        context.go('/expenses/edit/$txId');
+      } else if (payload.startsWith('txn:') || payload.contains('amountPaise')) {
+        context.go('/expenses');
+      }
+    } catch (e) {
+      AppLogger.error('Failed to navigate to payload $payload: $e', context: 'Notification');
+    }
+  }
+
+  /// Process any pending notification payload that arrived before navigation was ready
+  static void processPendingPayload() {
+    if (pendingPayload != null) {
+      final payload = pendingPayload;
+      pendingPayload = null;
+      handlePayload(payload);
+    }
+  }
+
   void _onNotificationTapped(NotificationResponse response) {
     AppLogger.info(
       'Notification tapped: ${response.payload}',
       context: 'Notification',
     );
+    handlePayload(response.payload);
   }
 
-  /// Request permissions on Android 13+
+  /// Request notification & exact alarm permissions on Android
   Future<bool?> requestPermissions() async {
     if (kIsWeb) return false;
     final androidImplementation = _plugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
+    try {
+      await androidImplementation?.requestExactAlarmsPermission();
+    } catch (e) {
+      AppLogger.warn('requestExactAlarmsPermission error: $e', context: 'Notification');
+    }
     return await androidImplementation?.requestNotificationsPermission();
+  }
+
+  /// Check whether exact alarms can be scheduled on Android
+  Future<bool> canScheduleExactNotifications() async {
+    if (kIsWeb) return false;
+    final androidImplementation = _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    return await androidImplementation?.canScheduleExactNotifications() ?? true;
   }
 
   /// Schedule daily tiffin reminder
@@ -150,19 +239,37 @@ class NotificationService {
           channelDescription: 'Daily meal reminders and confirmations',
           importance: Importance.high,
           priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
         ),
       );
 
-      await _plugin.zonedSchedule(
-        id,
-        'Tiffin Reminder ($mealType)',
-        'Did you receive your $mealType from $providerName?',
-        scheduledDate,
-        details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: 'tiffin:$id',
-      );
+      try {
+        await _plugin.zonedSchedule(
+          id,
+          'Tiffin Reminder ($mealType)',
+          'Did you receive your $mealType from $providerName?',
+          scheduledDate,
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time,
+          payload: 'tiffin:$id',
+        );
+      } catch (e) {
+        AppLogger.warn('Exact alarm for tiffin failed, falling back to inexact: $e', context: 'Notification');
+        await _plugin.zonedSchedule(
+          id,
+          'Tiffin Reminder ($mealType)',
+          'Did you receive your $mealType from $providerName?',
+          scheduledDate,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time,
+          payload: 'tiffin:$id',
+        );
+      }
+
+      AppLogger.info('Scheduled tiffin reminder ($mealType) at $scheduledDate (id=$id)', context: 'Notification');
     } catch (e) {
       AppLogger.error('Failed to schedule tiffin reminder: $e', context: 'Notification');
     }
@@ -206,6 +313,8 @@ class NotificationService {
         channelDescription: 'Hydration reminders during active hours',
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
+        playSound: true,
+        enableVibration: true,
       ),
     );
 
@@ -222,17 +331,31 @@ class NotificationService {
           'Drink a glass of water to hit your daily goal.',
           target,
           details,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.time,
           payload: 'water:$notificationId',
         );
       } catch (e) {
-        AppLogger.error('Error scheduling water reminder slot $notificationId: $e', context: 'Notification');
+        try {
+          await _plugin.zonedSchedule(
+            notificationId,
+            'Time to Hydrate! 💧',
+            'Drink a glass of water to hit your daily goal.',
+            target,
+            details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            matchDateTimeComponents: DateTimeComponents.time,
+            payload: 'water:$notificationId',
+          );
+        } catch (err) {
+          AppLogger.error('Error scheduling water reminder slot $notificationId: $err', context: 'Notification');
+        }
       }
 
       currentSlot = currentSlot.add(Duration(minutes: intervalMinutes));
       notificationId++;
     }
+    AppLogger.info('Scheduled water reminder slots from $startHour:$startMinute to $endHour:$endMinute', context: 'Notification');
   }
 
   /// Cancel all scheduled water reminders (IDs 1000..1050)
@@ -242,15 +365,27 @@ class NotificationService {
     }
   }
 
-  /// Schedule a todo reminder
+  /// Schedule a todo reminder with exact alarm delivery
   Future<void> scheduleTodoReminder({
     required int id,
     required String title,
     required DateTime dueAt,
   }) async {
     if (kIsWeb) return;
-    final scheduledDate = tz.TZDateTime.from(dueAt, tz.local);
-    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
+
+    final scheduledDate = tz.TZDateTime.fromMillisecondsSinceEpoch(
+      tz.local,
+      dueAt.millisecondsSinceEpoch,
+    );
+    final now = tz.TZDateTime.now(tz.local);
+
+    if (scheduledDate.isBefore(now)) {
+      AppLogger.warn(
+        'Skipping todo reminder for "$title": scheduled $scheduledDate is before now $now',
+        context: 'Notification',
+      );
+      return;
+    }
 
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -259,6 +394,8 @@ class NotificationService {
         channelDescription: 'Reminders for scheduled to-do items',
         importance: Importance.high,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
       ),
     );
 
@@ -269,11 +406,35 @@ class NotificationService {
         'Don\'t forget: $title',
         scheduledDate,
         details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: 'todo:$id',
       );
+      AppLogger.info(
+        'Successfully scheduled exact todo reminder for "$title" at $scheduledDate (id=$id)',
+        context: 'Notification',
+      );
     } catch (e) {
-      AppLogger.error('Failed to schedule todo reminder: $e', context: 'Notification');
+      AppLogger.warn(
+        'Exact alarm for todo failed ($e), falling back to inexact',
+        context: 'Notification',
+      );
+      try {
+        await _plugin.zonedSchedule(
+          id,
+          'Task Due: $title',
+          'Don\'t forget: $title',
+          scheduledDate,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          payload: 'todo:$id',
+        );
+        AppLogger.info(
+          'Scheduled inexact fallback todo reminder for "$title" at $scheduledDate (id=$id)',
+          context: 'Notification',
+        );
+      } catch (err) {
+        AppLogger.error('Failed to schedule todo reminder: $err', context: 'Notification');
+      }
     }
   }
 
@@ -291,11 +452,14 @@ class NotificationService {
         channelDescription: 'Monthly budget warnings and bill due alerts',
         importance: Importance.high,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
       ),
     );
 
     try {
       await _plugin.show(id, title, body, details, payload: 'budget:$id');
+      AppLogger.info('Showed budget alert: $title', context: 'Notification');
     } catch (e) {
       AppLogger.error('Failed to show budget alert: $e', context: 'Notification');
     }
@@ -316,11 +480,14 @@ class NotificationService {
         channelDescription: 'Auto-detected expense confirmations',
         importance: Importance.high,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
       ),
     );
 
     try {
       await _plugin.show(id, title, body, details, payload: payload);
+      AppLogger.info('Showed txn detected notification: $title', context: 'Notification');
     } catch (e) {
       AppLogger.error('Failed to show txn detected notification: $e', context: 'Notification');
     }
@@ -329,10 +496,12 @@ class NotificationService {
   /// Cancel notification by ID
   Future<void> cancel(int id) async {
     await _plugin.cancel(id);
+    AppLogger.info('Cancelled notification id=$id', context: 'Notification');
   }
 
   /// Cancel all notifications
   Future<void> cancelAll() async {
     await _plugin.cancelAll();
+    AppLogger.info('Cancelled all notifications', context: 'Notification');
   }
 }

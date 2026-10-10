@@ -77,9 +77,9 @@ class TxnParser {
     // 3. Extract Merchant / Party Name
     String merchant = '';
 
-    // Check patterns like: "paid to X", "sent to X", "at X", "transferred to X"
+    // Check patterns like: "paid to X", "sent to X", "from X", "at X", "transferred to X"
     final partyReg = RegExp(
-      r'(?:paid\s+to|sent\s+to|transferred\s+to|at|to)\s+([A-Za-z0-9\s\.\-_@&]+?)(?:\s+(?:on|using|via|ref|upi|from|\.|$))',
+      r'(?:paid\s+to|sent\s+to|transferred\s+to|received\s+from|from|at|to)\s+([A-Za-z0-9\s\.\-_@&]+?)(?:\s+(?:on|using|via|ref|upi|deposited|in\s+your|into|\.|$))',
       caseSensitive: false,
     );
 

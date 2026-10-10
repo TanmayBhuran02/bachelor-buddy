@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/security/biometric_lock_screen.dart';
+import 'core/notifications/notification_service.dart';
 import 'router.dart';
 import 'providers.dart';
 
@@ -18,6 +19,12 @@ class BachelorBuddyApp extends ConsumerWidget {
     final showOnboarding = ref.watch(showOnboardingProvider);
     final isAuthenticated = ref.watch(isAuthenticatedProvider);
     final router = createRouter(showOnboarding: showOnboarding);
+
+    if (isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        NotificationService.processPendingPayload();
+      });
+    }
 
     return MaterialApp.router(
       title: 'Bachelor Buddy',

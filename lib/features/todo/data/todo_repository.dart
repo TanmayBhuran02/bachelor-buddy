@@ -88,6 +88,15 @@ class TodoRepository {
           ),
         );
 
+    if (dueAt != null) {
+      final notifId = NotificationService.hashId(id, 40000);
+      await NotificationService().scheduleTodoReminder(
+        id: notifId,
+        title: title,
+        dueAt: DateTime.fromMillisecondsSinceEpoch(dueAt),
+      );
+    }
+
     _eventBus.fire(TodoCreated(todoId: id, title: title));
     return id;
   }
@@ -152,6 +161,8 @@ class TodoRepository {
     );
 
     if (newStatus) {
+      await NotificationService().cancel(NotificationService.hashId(todo.id, 40000));
+
       // Fire event for action runner & widget sync
       _eventBus.fire(TodoCompleted(
         todoId: todo.id,
@@ -164,6 +175,12 @@ class TodoRepository {
       if (todo.recurrence != 'none' && todo.dueAt != null) {
         _generateNextOccurrence(todo);
       }
+    } else if (todo.dueAt != null) {
+      await NotificationService().scheduleTodoReminder(
+        id: NotificationService.hashId(todo.id, 40000),
+        title: todo.title,
+        dueAt: DateTime.fromMillisecondsSinceEpoch(todo.dueAt!),
+      );
     }
 
     return true;

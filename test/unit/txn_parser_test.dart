@@ -58,6 +58,21 @@ void main() {
       expect(txn.appSource, 'Paytm');
     });
 
+    test('parses Paytm received from person notification', () {
+      const text =
+          'Received ₹1 from Mr Devendra Madhukar Dhande1 Deposited in your Bank Of Maharashtra - 4271 on 11 October at 2:41 AM';
+      final txn = TxnParser.parse(
+        text: text,
+        packageName: 'net.one97.paytm',
+      );
+
+      expect(txn, isNotNull);
+      expect(txn!.amountPaise, 100);
+      expect(txn.type, 'income');
+      expect(txn.merchantOrParty, 'Mr Devendra Madhukar Dhande1');
+      expect(txn.appSource, 'Paytm');
+    });
+
     test('ignores non-transaction notification', () {
       const text = 'Check out exciting deals on electronics today!';
       final txn = TxnParser.parse(

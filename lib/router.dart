@@ -16,12 +16,12 @@ import 'features/settings/ui/settings_screen.dart';
 import 'features/onboarding/ui/onboarding_screen.dart';
 import 'shared/shell_scaffold.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+final shellNavigatorKey = GlobalKey<NavigatorState>();
 
 GoRouter createRouter({bool showOnboarding = false}) {
   return GoRouter(
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: rootNavigatorKey,
     initialLocation: showOnboarding ? '/onboarding' : '/home',
     routes: [
       // Onboarding (outside shell)
@@ -32,7 +32,7 @@ GoRouter createRouter({bool showOnboarding = false}) {
 
       // Main app with bottom navigation shell
       ShellRoute(
-        navigatorKey: _shellNavigatorKey,
+        navigatorKey: shellNavigatorKey,
         builder: (context, state, child) => ShellScaffold(child: child),
         routes: [
           GoRoute(
@@ -49,12 +49,12 @@ GoRouter createRouter({bool showOnboarding = false}) {
             routes: [
               GoRoute(
                 path: 'new',
-                parentNavigatorKey: _rootNavigatorKey,
+                parentNavigatorKey: rootNavigatorKey,
                 builder: (context, state) => const AddExpenseScreen(),
               ),
               GoRoute(
                 path: 'edit/:id',
-                parentNavigatorKey: _rootNavigatorKey,
+                parentNavigatorKey: rootNavigatorKey,
                 builder: (context, state) => AddExpenseScreen(
                   expenseId: state.pathParameters['id'],
                 ),
@@ -75,12 +75,12 @@ GoRouter createRouter({bool showOnboarding = false}) {
             routes: [
               GoRoute(
                 path: 'new',
-                parentNavigatorKey: _rootNavigatorKey,
+                parentNavigatorKey: rootNavigatorKey,
                 builder: (context, state) => const AddTodoScreen(),
               ),
               GoRoute(
                 path: 'edit/:id',
-                parentNavigatorKey: _rootNavigatorKey,
+                parentNavigatorKey: rootNavigatorKey,
                 builder: (context, state) => AddTodoScreen(
                   editTodoId: state.pathParameters['id'],
                 ),
@@ -99,14 +99,14 @@ GoRouter createRouter({bool showOnboarding = false}) {
       // Budget (full screen, not in bottom nav)
       GoRoute(
         path: '/budget',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const BudgetScreen(),
       ),
 
       // Settings
       GoRoute(
         path: '/settings',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const SettingsScreen(),
       ),
     ],
