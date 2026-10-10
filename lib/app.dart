@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/security/biometric_lock_screen.dart';
 import 'router.dart';
 import 'providers.dart';
 
@@ -15,6 +16,7 @@ class BachelorBuddyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final showOnboarding = ref.watch(showOnboardingProvider);
+    final isAuthenticated = ref.watch(isAuthenticatedProvider);
     final router = createRouter(showOnboarding: showOnboarding);
 
     return MaterialApp.router(
@@ -24,6 +26,12 @@ class BachelorBuddyApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) {
+        if (!isAuthenticated) {
+          return const BiometricLockScreen();
+        }
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }

@@ -40,7 +40,17 @@ final intentParserProvider = Provider<IntentParser>((ref) {
 // ─── Theme ─────────────────────────────────────────────────────────────────
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
-  return ThemeMode.dark; // Default to dark; loaded from DB on startup
+  return ThemeMode.light; // Default to light mode; persistent across restarts
+});
+
+// ─── Security & Biometrics ──────────────────────────────────────────────────
+
+final biometricLockEnabledProvider = StateProvider<bool>((ref) {
+  return false;
+});
+
+final isAuthenticatedProvider = StateProvider<bool>((ref) {
+  return true; // Set to false on launch if biometric lock is enabled
 });
 
 // ─── Onboarding ────────────────────────────────────────────────────────────

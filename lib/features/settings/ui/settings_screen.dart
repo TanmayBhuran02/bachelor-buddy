@@ -11,6 +11,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:bachelor_buddy/core/theme/app_theme.dart';
 import 'package:bachelor_buddy/core/diagnostics/logger.dart';
+import 'package:bachelor_buddy/core/db/app_database.dart';
+import 'package:bachelor_buddy/core/security/biometric_service.dart';
 import 'package:bachelor_buddy/providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -34,9 +36,16 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('Dark Mode'),
             subtitle: const Text('Toggle between dark and light themes'),
             value: themeMode == ThemeMode.dark,
-            onChanged: (isDark) {
-              ref.read(themeModeProvider.notifier).state =
-                  isDark ? ThemeMode.dark : ThemeMode.light;
+            onChanged: (isDark) async {
+              final newMode = isDark ? ThemeMode.dark : ThemeMode.light;
+              ref.read(themeModeProvider.notifier).state = newMode;
+              final db = ref.read(databaseProvider);
+              await db.into(db.appSettings).insertOnConflictUpdate(
+                    AppSettingsCompanion.insert(
+                      key: 'theme_mode',
+                      value: isDark ? 'dark' : 'light',
+                    ),
+                  );
             },
           ),
           const Divider(),
@@ -48,12 +57,47 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('Biometric Lock'),
             subtitle: const Text('Require fingerprint or face unlock on startup'),
             trailing: Switch(
-              value: false,
-              onChanged: (val) {
+              value: ref.watch(biometricLockEnabledProvider),
+              onChanged: (enable) async {
+                if (enable) {
+                  final canAuth = await BiometricService.isBiometricsAvailable();
+                  if (!context.mounted) return;
+                  if (!canAuth) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No biometric hardware or enrolled prints detected.'),
+                      ),
+                    );
+                    return;
+                  }
+                  final authenticated = await BiometricService.authenticate(
+                    reason: 'Confirm biometrics to enable app lock',
+                  );
+                  if (!authenticated) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Biometric verification failed or cancelled.'),
+                      ),
+                    );
+                    return;
+                  }
+                }
+
+                ref.read(biometricLockEnabledProvider.notifier).state = enable;
+                final db = ref.read(databaseProvider);
+                await db.into(db.appSettings).insertOnConflictUpdate(
+                      AppSettingsCompanion.insert(
+                        key: 'biometric_lock_enabled',
+                        value: enable ? 'true' : 'false',
+                      ),
+                    );
+
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      val
+                      enable
                           ? 'Biometric app lock enabled'
                           : 'Biometric app lock disabled',
                     ),

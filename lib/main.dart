@@ -30,10 +30,24 @@ Future<void> main() async {
   final eventBus = EventBus();
   WidgetSyncService.listenToEvents(db, eventBus);
 
+  // Load user preferences from DB (default to light mode)
+  final themeSetting = await (db.select(db.appSettings)
+        ..where((s) => s.key.equals('theme_mode')))
+      .getSingleOrNull();
+  final initialTheme = themeSetting?.value == 'dark' ? ThemeMode.dark : ThemeMode.light;
+
+  final biometricSetting = await (db.select(db.appSettings)
+        ..where((s) => s.key.equals('biometric_lock_enabled')))
+      .getSingleOrNull();
+  final isBiometricLockEnabled = biometricSetting?.value == 'true';
+
   runApp(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(db),
+        themeModeProvider.overrideWith((ref) => initialTheme),
+        biometricLockEnabledProvider.overrideWith((ref) => isBiometricLockEnabled),
+        isAuthenticatedProvider.overrideWith((ref) => !isBiometricLockEnabled),
       ],
       child: const BachelorBuddyApp(),
     ),
