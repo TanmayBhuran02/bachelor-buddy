@@ -52,3 +52,9 @@ final tiffinLogsForMonthProvider =
   final monthPrefix = selectedDate.substring(0, 7);
   return repo.watchLogsForMonth(monthPrefix);
 });
+
+final tiffinLogsForSpecificMonthProvider =
+    StreamProvider.family<List<TiffinLog>, String>((ref, monthPrefix) {
+  final repo = ref.watch(tiffinRepositoryProvider);
+  return repo.watchLogsForMonth(monthPrefix);
+});

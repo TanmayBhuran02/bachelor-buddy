@@ -33,18 +33,8 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month),
-            onPressed: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: selectedDate,
-                firstDate: DateTime(2020),
-                lastDate: DateTime(2035),
-              );
-              if (picked != null) {
-                ref.read(tiffinSelectedDateProvider.notifier).state =
-                    DateFormat('yyyy-MM-dd').format(picked);
-              }
-            },
+            tooltip: 'Month Calendar',
+            onPressed: () => _showMonthCalendarModal(context),
           ),
         ],
       ),
@@ -55,7 +45,10 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
           children: [
             // Month Bill & Status Summary
             summaryAsync.when(
-              data: (summary) => _TiffinMonthlyCard(summary: summary),
+              data: (summary) => _TiffinMonthlyCard(
+                summary: summary,
+                onOpenCalendar: () => _showMonthCalendarModal(context),
+              ),
               loading: () => const LinearProgressIndicator(),
               error: (err, _) => Padding(
                 padding: const EdgeInsets.all(16),
@@ -142,6 +135,7 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
                       plan: item.plan,
                       log: item.log,
                       dateStr: selectedDateStr,
+                      onEdit: () => _showAddPlanModal(context, planToEdit: item.plan),
                     );
                   },
                 );
@@ -171,23 +165,39 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
     return DateFormat('d MMM').format(date).toUpperCase();
   }
 
-  void _showAddPlanModal(BuildContext context) {
+  void _showAddPlanModal(BuildContext context, {TiffinPlan? planToEdit}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.cardDark,
+      backgroundColor: AppColors.card(context),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
       ),
-      builder: (ctx) => const _AddTiffinPlanSheet(),
+      builder: (ctx) => _AddOrEditTiffinPlanSheet(planToEdit: planToEdit),
+    );
+  }
+
+  void _showMonthCalendarModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.card(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+      ),
+      builder: (ctx) => const _TiffinMonthlyCalendarSheet(),
     );
   }
 }
 
 class _TiffinMonthlyCard extends StatelessWidget {
   final TiffinMonthlySummary summary;
+  final VoidCallback onOpenCalendar;
 
-  const _TiffinMonthlyCard({required this.summary});
+  const _TiffinMonthlyCard({
+    required this.summary,
+    required this.onOpenCalendar,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -223,15 +233,22 @@ class _TiffinMonthlyCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface(context),
-                    borderRadius: BorderRadius.circular(2),
-                    border: Border.all(color: AppColors.border(context)),
+                InkWell(
+                  onTap: onOpenCalendar,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface(context),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppColors.border(context)),
+                    ),
+                    child: const Icon(
+                      Icons.calendar_month,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
                   ),
-                  child: const Icon(Icons.receipt_long,
-                      color: AppColors.kraftBrown, size: 24),
                 ),
               ],
             ),
@@ -385,11 +402,13 @@ class _TiffinMealCard extends ConsumerWidget {
   final TiffinPlan plan;
   final TiffinLog? log;
   final String dateStr;
+  final VoidCallback onEdit;
 
   const _TiffinMealCard({
     required this.plan,
     required this.log,
     required this.dateStr,
+    required this.onEdit,
   });
 
   @override
@@ -466,6 +485,58 @@ class _TiffinMealCard extends ConsumerWidget {
                     ],
                   ),
                 ),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, size: 20, color: AppColors.textMuted(context)),
+                  onSelected: (val) async {
+                    if (val == 'edit') {
+                      onEdit();
+                    } else if (val == 'delete') {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('DELETE TIFFIN PLAN'),
+                          content: Text('Delete plan for "${plan.providerName}" (${plan.mealType})?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('CANCEL'),
+                            ),
+                            FilledButton(
+                              style: FilledButton.styleFrom(backgroundColor: AppColors.tertiary),
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text('DELETE'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed == true) {
+                        await repo.deletePlan(plan.id);
+                      }
+                    }
+                  },
+                  itemBuilder: (ctx) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, size: 18),
+                          SizedBox(width: 8),
+                          Text('Edit Plan'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline, size: 18, color: AppColors.tertiary),
+                          SizedBox(width: 8),
+                          Text('Delete Plan', style: TextStyle(color: AppColors.tertiary)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -496,7 +567,7 @@ class _TiffinMealCard extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            // Action buttons — only show when pending
+            // Action buttons
             if (status == 'pending') ...[
               Row(
                 children: [
@@ -521,6 +592,24 @@ class _TiffinMealCard extends ConsumerWidget {
                   ),
                 ],
               ),
+            ] else ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        if (status == 'received') {
+                          await repo.markSkipped(planId: plan.id, date: dateStr);
+                        } else {
+                          await repo.markReceived(planId: plan.id, date: dateStr);
+                        }
+                      },
+                      icon: Icon(status == 'received' ? Icons.close : Icons.check, size: 16),
+                      label: Text(status == 'received' ? 'SWITCH TO SKIPPED' : 'SWITCH TO RECEIVED'),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ],
         ),
@@ -529,19 +618,42 @@ class _TiffinMealCard extends ConsumerWidget {
   }
 }
 
-class _AddTiffinPlanSheet extends ConsumerStatefulWidget {
-  const _AddTiffinPlanSheet();
+class _AddOrEditTiffinPlanSheet extends ConsumerStatefulWidget {
+  final TiffinPlan? planToEdit;
+
+  const _AddOrEditTiffinPlanSheet({this.planToEdit});
 
   @override
-  ConsumerState<_AddTiffinPlanSheet> createState() =>
-      _AddTiffinPlanSheetState();
+  ConsumerState<_AddOrEditTiffinPlanSheet> createState() =>
+      _AddOrEditTiffinPlanSheetState();
 }
 
-class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
-  final _providerController = TextEditingController();
-  final _priceController = TextEditingController(text: '80');
-  String _mealType = 'lunch';
-  TimeOfDay _reminderTime = const TimeOfDay(hour: 12, minute: 30);
+class _AddOrEditTiffinPlanSheetState
+    extends ConsumerState<_AddOrEditTiffinPlanSheet> {
+  late final TextEditingController _providerController;
+  late final TextEditingController _priceController;
+  late String _mealType;
+  late TimeOfDay _reminderTime;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.planToEdit;
+    _providerController = TextEditingController(text: p?.providerName ?? '');
+    _priceController = TextEditingController(
+      text: p != null ? '${p.pricePerTiffinPaise ~/ 100}' : '80',
+    );
+    _mealType = p?.mealType ?? 'lunch';
+
+    if (p != null) {
+      final parts = p.reminderTime.split(':');
+      final h = int.tryParse(parts[0]) ?? 12;
+      final m = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+      _reminderTime = TimeOfDay(hour: h, minute: m);
+    } else {
+      _reminderTime = const TimeOfDay(hour: 12, minute: 30);
+    }
+  }
 
   @override
   void dispose() {
@@ -552,6 +664,8 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.planToEdit != null;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -566,8 +680,10 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('NEW TIFFIN PLAN',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                isEditing ? 'EDIT TIFFIN PLAN' : 'NEW TIFFIN PLAN',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
@@ -597,7 +713,9 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
                     DropdownMenuItem(value: 'lunch', child: Text('LUNCH')),
                     DropdownMenuItem(value: 'dinner', child: Text('DINNER')),
                   ],
-                  onChanged: (val) => setState(() => _mealType = val!),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _mealType = val);
+                  },
                 ),
               ),
               const SizedBox(width: 12),
@@ -654,24 +772,423 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
                     DateFormat('yyyy-MM-dd').format(DateTime.now());
 
                 final repo = ref.read(tiffinRepositoryProvider);
-                await repo.createPlan(
-                  providerName: name,
-                  mealType: _mealType,
-                  pricePerTiffinPaise: pricePaise,
-                  activeWeekdaysMask: 127, // All days
-                  reminderTime: timeStr,
-                  startDate: todayStr,
-                );
+
+                if (isEditing) {
+                  await repo.updatePlan(
+                    id: widget.planToEdit!.id,
+                    providerName: name,
+                    mealType: _mealType,
+                    pricePerTiffinPaise: pricePaise,
+                    activeWeekdaysMask: widget.planToEdit!.activeWeekdaysMask,
+                    reminderTime: timeStr,
+                  );
+                } else {
+                  await repo.createPlan(
+                    providerName: name,
+                    mealType: _mealType,
+                    pricePerTiffinPaise: pricePaise,
+                    activeWeekdaysMask: 127, // All days
+                    reminderTime: timeStr,
+                    startDate: todayStr,
+                  );
+                }
 
                 if (context.mounted) {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('CREATE PLAN'),
+              child: Text(isEditing ? 'UPDATE PLAN' : 'CREATE PLAN'),
             ),
+          ),
+
+          if (isEditing) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.tertiary,
+                  side: const BorderSide(color: AppColors.tertiary),
+                ),
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('DELETE PLAN'),
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('DELETE TIFFIN PLAN'),
+                      content: Text(
+                          'Delete plan for "${widget.planToEdit!.providerName}"?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('CANCEL'),
+                        ),
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.tertiary),
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('DELETE'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true) {
+                    final repo = ref.read(tiffinRepositoryProvider);
+                    await repo.deletePlan(widget.planToEdit!.id);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  }
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TiffinMonthlyCalendarSheet extends ConsumerStatefulWidget {
+  const _TiffinMonthlyCalendarSheet();
+
+  @override
+  ConsumerState<_TiffinMonthlyCalendarSheet> createState() =>
+      _TiffinMonthlyCalendarSheetState();
+}
+
+class _TiffinMonthlyCalendarSheetState
+    extends ConsumerState<_TiffinMonthlyCalendarSheet> {
+  late DateTime _displayedMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    final selectedStr = ref.read(tiffinSelectedDateProvider);
+    final dt = DateTime.tryParse(selectedStr) ?? DateTime.now();
+    _displayedMonth = DateTime(dt.year, dt.month, 1);
+  }
+
+  void _prevMonth() {
+    setState(() {
+      _displayedMonth =
+          DateTime(_displayedMonth.year, _displayedMonth.month - 1, 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _displayedMonth =
+          DateTime(_displayedMonth.year, _displayedMonth.month + 1, 1);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final monthPrefix = DateFormat('yyyy-MM').format(_displayedMonth);
+    final logsAsync =
+        ref.watch(tiffinLogsForSpecificMonthProvider(monthPrefix));
+    final plansAsync = ref.watch(activeTiffinPlansProvider);
+    final selectedDateStr = ref.watch(tiffinSelectedDateProvider);
+    final now = DateTime.now();
+    final todayStr = DateFormat('yyyy-MM-dd').format(now);
+
+    final firstDay = DateTime(_displayedMonth.year, _displayedMonth.month, 1);
+    final daysInMonth =
+        DateTime(_displayedMonth.year, _displayedMonth.month + 1, 0).day;
+    final leadingEmpty = firstDay.weekday - 1; // Mon=1 -> 0 leading empty
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with Month Navigation
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: _prevMonth,
+              ),
+              Text(
+                DateFormat('MMMM yyyy').format(_displayedMonth).toUpperCase(),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.0),
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: _nextMonth,
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Weekday header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+                .map((day) => Expanded(
+                      child: Center(
+                        child: Text(
+                          day,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textMuted(context),
+                          ),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+          const SizedBox(height: 8),
+
+          // Calendar Grid
+          logsAsync.when(
+            data: (logs) {
+              final plans = plansAsync.value ?? [];
+              final logsByDate = <String, List<TiffinLog>>{};
+              for (final l in logs) {
+                logsByDate.putIfAbsent(l.date, () => []).add(l);
+              }
+
+              int monthReceived = 0;
+              int monthSkipped = 0;
+              int monthPending = 0;
+
+              return Column(
+                children: [
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: leadingEmpty + daysInMonth,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 7,
+                      mainAxisSpacing: 6,
+                      crossAxisSpacing: 6,
+                      childAspectRatio: 1.0,
+                    ),
+                    itemBuilder: (ctx, index) {
+                      if (index < leadingEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final day = index - leadingEmpty + 1;
+                      final date = DateTime(
+                          _displayedMonth.year, _displayedMonth.month, day);
+                      final dateStr = DateFormat('yyyy-MM-dd').format(date);
+                      final isSelected = (dateStr == selectedDateStr);
+                      final isToday = (dateStr == todayStr);
+
+                      final dayLogs = logsByDate[dateStr] ?? [];
+                      final hasReceived =
+                          dayLogs.any((l) => l.status == 'received');
+                      final hasSkipped =
+                          dayLogs.any((l) => l.status == 'skipped');
+
+                      // Pending check: if date is today or past, and active plan applies, but neither received nor skipped
+                      bool hasPending = false;
+                      if (!date.isAfter(DateTime(now.year, now.month, now.day))) {
+                        final weekdayMask = 1 << (date.weekday - 1);
+                        final applicable = plans.where((p) =>
+                            (p.activeWeekdaysMask & weekdayMask) != 0 &&
+                            p.startDate.compareTo(dateStr) <= 0);
+                        if (applicable.isNotEmpty) {
+                          for (final p in applicable) {
+                            final log = dayLogs.firstWhere(
+                              (l) => l.planId == p.id,
+                              orElse: () => TiffinLog(
+                                id: '',
+                                planId: p.id,
+                                date: dateStr,
+                                status: 'pending',
+                              ),
+                            );
+                            if (log.status == 'pending') {
+                              hasPending = true;
+                              break;
+                            }
+                          }
+                        }
+                      }
+
+                      if (hasReceived) monthReceived++;
+                      if (hasSkipped) monthSkipped++;
+                      if (hasPending) monthPending++;
+
+                      return InkWell(
+                        onTap: () {
+                          ref.read(tiffinSelectedDateProvider.notifier).state =
+                              dateStr;
+                          Navigator.pop(context);
+                        },
+                        borderRadius: BorderRadius.circular(4),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primary.withValues(alpha: 0.15)
+                                : isToday
+                                    ? AppColors.surface(context)
+                                    : Colors.transparent,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : isToday
+                                      ? AppColors.border(context)
+                                      : Colors.transparent,
+                              width: isSelected ? 1.5 : 1.0,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '$day',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSelected || isToday
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : AppColors.text(context),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (hasReceived)
+                                    Container(
+                                      width: 5,
+                                      height: 5,
+                                      margin: const EdgeInsets.symmetric(horizontal: 1),
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.secondary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  if (hasSkipped)
+                                    Container(
+                                      width: 5,
+                                      height: 5,
+                                      margin: const EdgeInsets.symmetric(horizontal: 1),
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.tertiary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  if (hasPending)
+                                    Container(
+                                      width: 5,
+                                      height: 5,
+                                      margin: const EdgeInsets.symmetric(horizontal: 1),
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.warning,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+
+                  // Legend row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _CalendarLegendItem(
+                        color: AppColors.secondary,
+                        label: 'Received',
+                        count: monthReceived,
+                      ),
+                      _CalendarLegendItem(
+                        color: AppColors.tertiary,
+                        label: 'Skipped',
+                        count: monthSkipped,
+                      ),
+                      _CalendarLegendItem(
+                        color: AppColors.warning,
+                        label: 'Pending',
+                        count: monthPending,
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (e, _) => Center(child: Text('Error loading calendar: $e')),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CalendarLegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  final int count;
+
+  const _CalendarLegendItem({
+    required this.color,
+    required this.label,
+    required this.count,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '$label ($count)',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textMuted(context),
+          ),
+        ),
+      ],
     );
   }
 }
