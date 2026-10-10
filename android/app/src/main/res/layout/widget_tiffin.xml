@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:orientation="vertical"
-    android:padding="14dp">
+    android:padding="8dp">
 
     <!-- Header Row -->
     <LinearLayout
@@ -14,19 +14,13 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_widget_tiffin" />
-
         <TextView
             android:id="@+id/tiffin_widget_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:text="TODAY'S TIFFIN"
-            android:textColor="#6C63FF"
+            android:text="TIFFIN //"
+            android:textColor="#1A1A1A"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -34,64 +28,67 @@
             android:id="@+id/tiffin_widget_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pending"
-            android:textColor="#FFB74D"
-            android:textSize="12sp"
+            android:text="PENDING"
+            android:textColor="#C62828"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <!-- Meal Details -->
     <TextView
         android:id="@+id/tiffin_widget_meal"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="3dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:text="Lunch • Sai Tiffin Service"
-        android:textColor="#FFFFFF"
-        android:textSize="15sp"
+        android:textColor="#1A1A1A"
+        android:textSize="11sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tiffin_widget_subtitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:text="Scheduled for today"
-        android:textColor="#9E9EB0"
-        android:textSize="12sp" />
+        android:textColor="#666666"
+        android:textSize="9sp" />
 
     <!-- Action Buttons Row -->
     <LinearLayout
         android:id="@+id/tiffin_actions_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/btn_tiffin_skip"
             android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_marginEnd="6dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="4dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_secondary"
             android:gravity="center"
             android:text="Skip"
-            android:textColor="#B0B0C4"
-            android:textSize="12sp"
+            android:textColor="#1A1A1A"
+            android:textSize="10sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/btn_tiffin_received"
             android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_marginStart="6dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="4dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_purple"
             android:gravity="center"
-            android:text="Received"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
+            android:text="Got it"
+            android:textColor="#FFFEEF"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:orientation="vertical"
-    android:padding="14dp">
+    android:padding="8dp">
 
     <!-- Header Row -->
     <LinearLayout
@@ -14,19 +14,13 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_widget_budget" />
-
         <TextView
             android:id="@+id/budget_widget_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:text="MONTHLY BUDGET"
-            android:textColor="#6C63FF"
+            android:text="BUDGET //"
+            android:textColor="#1A1A1A"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -34,25 +28,25 @@
             android:id="@+id/budget_widget_spent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="₹12,450 / ₹25,000"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
+            android:text="₹12.4k / ₹25k"
+            android:textColor="#1A1A1A"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Clean Horizontal Progress Bar -->
+    <!-- Compact Progress Bar (5dp) -->
     <ProgressBar
         android:id="@+id/budget_widget_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:max="100"
         android:progress="50"
         android:progressDrawable="@drawable/widget_progress_purple" />
 
-    <!-- Bottom Row with Safe Pacing Indicator -->
+    <!-- Bottom Row: Safe Pacing Indicator -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,9 +58,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Safe to spend: ₹417 / day"
-            android:textColor="#00BFA6"
-            android:textSize="12sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Safe: ₹417 / day"
+            android:textColor="#2E7D32"
+            android:textSize="10sp"
             android:textStyle="bold" />
 
         <TextView
@@ -74,7 +70,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="50%"
-            android:textColor="#9E9EB0"
-            android:textSize="12sp" />
+            android:textColor="#666666"
+            android:textSize="10sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

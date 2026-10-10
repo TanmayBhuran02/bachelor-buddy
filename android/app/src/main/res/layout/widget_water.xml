@@ -5,28 +5,22 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:orientation="vertical"
-    android:padding="14dp">
+    android:padding="8dp">
 
-    <!-- Header Row -->
+    <!-- Top Row: Title + Progress Values -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_widget_water" />
-
         <TextView
             android:id="@+id/water_widget_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:text="HYDRATION"
-            android:textColor="#00BFA6"
+            android:text="WATER //"
+            android:textColor="#1A1A1A"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -35,24 +29,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1,600 / 2,500 ml"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
+            android:textColor="#1A1A1A"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Clean Horizontal Progress Bar -->
+    <!-- Compact Progress Bar (4dp high) -->
     <ProgressBar
         android:id="@+id/water_widget_progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:max="100"
         android:progress="64"
         android:progressDrawable="@drawable/widget_progress_teal" />
 
-    <!-- Bottom Row with Status and Minimal +1 Glass Button -->
+    <!-- Bottom Row: Status + Quick Action Button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,34 +58,29 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="8 glasses drank"
-            android:textColor="#9E9EB0"
-            android:textSize="12sp" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="8 glasses (64%)"
+            android:textColor="#666666"
+            android:textSize="10sp" />
 
         <LinearLayout
             android:id="@+id/btn_water_add"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="24dp"
             android:background="@drawable/widget_btn_teal"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp">
-
-            <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_glass_plus"
-                android:tint="#161622" />
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
 
             <TextView
                 android:id="@+id/btn_water_add_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="+1 Glass"
-                android:textColor="#161622"
-                android:textSize="12sp"
+                android:text="+200 ml"
+                android:textColor="#FFFEEF"
+                android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
