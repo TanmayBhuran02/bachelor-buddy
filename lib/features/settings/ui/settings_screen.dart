@@ -13,6 +13,7 @@ import 'package:bachelor_buddy/core/theme/app_theme.dart';
 import 'package:bachelor_buddy/core/diagnostics/logger.dart';
 import 'package:bachelor_buddy/core/db/app_database.dart';
 import 'package:bachelor_buddy/core/security/biometric_service.dart';
+import 'package:bachelor_buddy/features/settings/ui/notification_settings_screen.dart';
 import 'package:bachelor_buddy/shared/logo_icon.dart';
 import 'package:bachelor_buddy/providers.dart';
 
@@ -106,6 +107,24 @@ class SettingsScreen extends ConsumerWidget {
                 );
               },
             ),
+          ),
+          const Divider(),
+
+          // Notifications section
+          _SectionHeader(title: 'NOTIFICATIONS'),
+          ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: const Text('Notification Preferences'),
+            subtitle: const Text('Manage alerts for water, tiffin, to-do & auto-expense'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationSettingsScreen(),
+                ),
+              );
+            },
           ),
           const Divider(),
 

@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
+import 'package:bachelor_buddy/core/notifications/notification_service.dart';
 import 'package:bachelor_buddy/features/actions/action_intent.dart';
 
 const _uuid = Uuid();
@@ -109,6 +110,17 @@ class TodoRepository {
         recurrence: Value(recurrence),
       ),
     );
+
+    final notifId = NotificationService.hashId(id, 40000);
+    if (dueAt != null) {
+      await NotificationService().scheduleTodoReminder(
+        id: notifId,
+        title: title,
+        dueAt: DateTime.fromMillisecondsSinceEpoch(dueAt),
+      );
+    } else {
+      await NotificationService().cancel(notifId);
+    }
   }
 
   /// Toggle completion of a todo.
@@ -195,6 +207,8 @@ class TodoRepository {
             actionStatus: Value(parent.actionType != null ? 'suggested' : 'none'),
           ),
         );
+
+    _eventBus.fire(TodoCreated(todoId: newId, title: parent.title));
   }
 
   /// Update action status (confirmed / dismissed)
@@ -206,6 +220,7 @@ class TodoRepository {
 
   /// Delete a todo
   Future<void> deleteTodo(String id) async {
+    await NotificationService().cancel(NotificationService.hashId(id, 40000));
     await (_db.delete(_db.todos)..where((t) => t.id.equals(id))).go();
   }
 }

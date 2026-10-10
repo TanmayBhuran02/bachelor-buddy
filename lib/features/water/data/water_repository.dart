@@ -8,6 +8,8 @@ import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
+import 'package:bachelor_buddy/core/notifications/notification_preferences.dart';
+import 'package:bachelor_buddy/core/notifications/notification_scheduler.dart';
 
 const _uuid = Uuid();
 
@@ -183,5 +185,8 @@ class WaterRepository {
         remindersEnabled: Value(remindersEnabled),
       ),
     );
+
+    final prefs = await NotificationPreferences.load(_db);
+    await NotificationScheduler.syncAllReminders(_db, prefs);
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/db/app_database.dart';
 import 'core/events/domain_event.dart';
+import 'core/notifications/notification_scheduler.dart';
 import 'core/widgets_sync/widget_callbacks.dart';
 import 'core/widgets_sync/widget_sync_service.dart';
 import 'providers.dart';
@@ -29,6 +30,9 @@ Future<void> main() async {
   // Automatically sync widgets whenever in-app domain events fire
   final eventBus = EventBus();
   WidgetSyncService.listenToEvents(db, eventBus);
+
+  // Initialize notifications and schedule reminders
+  await NotificationScheduler.initialize(db, eventBus);
 
   // Load user preferences from DB (default to light mode)
   final themeSetting = await (db.select(db.appSettings)

@@ -7,6 +7,9 @@ import 'package:uuid/uuid.dart';
 
 import 'package:bachelor_buddy/core/db/app_database.dart';
 import 'package:bachelor_buddy/core/events/domain_event.dart';
+import 'package:bachelor_buddy/core/notifications/notification_preferences.dart';
+import 'package:bachelor_buddy/core/notifications/notification_scheduler.dart';
+import 'package:bachelor_buddy/core/notifications/notification_service.dart';
 import 'package:bachelor_buddy/features/expenses/data/expense_repository.dart';
 
 const _uuid = Uuid();
@@ -134,6 +137,9 @@ class TiffinRepository {
             isActive: const Value(true),
           ),
         );
+
+    final prefs = await NotificationPreferences.load(_db);
+    await NotificationScheduler.syncAllReminders(_db, prefs);
     return id;
   }
 
@@ -155,6 +161,9 @@ class TiffinRepository {
         reminderTime: Value(reminderTime),
       ),
     );
+
+    final prefs = await NotificationPreferences.load(_db);
+    await NotificationScheduler.syncAllReminders(_db, prefs);
   }
 
   /// Mark tiffin as received for a given date
@@ -291,6 +300,7 @@ class TiffinRepository {
 
   /// Deactivate a plan
   Future<void> deletePlan(String id) async {
+    await NotificationService().cancel(NotificationService.hashId(id, 20000));
     await (_db.update(_db.tiffinPlans)..where((p) => p.id.equals(id))).write(
       const TiffinPlansCompanion(isActive: Value(false)),
     );

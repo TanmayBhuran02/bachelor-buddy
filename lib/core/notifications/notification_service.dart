@@ -24,6 +24,12 @@ class NotificationService {
   static const String waterChannelId = 'water_reminders';
   static const String todoChannelId = 'todo_reminders';
   static const String billChannelId = 'bill_reminders';
+  static const String txnChannelId = 'txn_detected';
+
+  /// Deterministic ID generator from string keys
+  static int hashId(String key, [int prefix = 0]) {
+    return prefix + (key.hashCode.abs() % 50000);
+  }
 
   Future<void> initialize() async {
     if (kIsWeb || _initialized) return;
@@ -46,6 +52,54 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
+    // Create Android notification channels
+    final androidImplementation = _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidImplementation != null) {
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          tiffinChannelId,
+          'Tiffin Reminders',
+          description: 'Daily meal reminders and confirmations',
+          importance: Importance.high,
+        ),
+      );
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          waterChannelId,
+          'Water Reminders',
+          description: 'Hydration reminders during active hours',
+          importance: Importance.defaultImportance,
+        ),
+      );
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          todoChannelId,
+          'Task Reminders',
+          description: 'Reminders for scheduled to-do items',
+          importance: Importance.high,
+        ),
+      );
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          billChannelId,
+          'Budget & Bill Alerts',
+          description: 'Monthly budget warnings and bill due alerts',
+          importance: Importance.high,
+        ),
+      );
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          txnChannelId,
+          'Transaction Detected',
+          description: 'Auto-detected expense confirmations',
+          importance: Importance.high,
+        ),
+      );
+    }
+
     _initialized = true;
     AppLogger.info('NotificationService initialized', context: 'Notification');
   }
@@ -59,6 +113,7 @@ class NotificationService {
 
   /// Request permissions on Android 13+
   Future<bool?> requestPermissions() async {
+    if (kIsWeb) return false;
     final androidImplementation = _plugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
@@ -73,39 +128,44 @@ class NotificationService {
     required int hour,
     required int minute,
   }) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    if (kIsWeb) return;
+    try {
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      const details = NotificationDetails(
+        android: AndroidNotificationDetails(
+          tiffinChannelId,
+          'Tiffin Reminders',
+          channelDescription: 'Daily meal reminders and confirmations',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      );
+
+      await _plugin.zonedSchedule(
+        id,
+        'Tiffin Reminder ($mealType)',
+        'Did you receive your $mealType from $providerName?',
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: 'tiffin:$id',
+      );
+    } catch (e) {
+      AppLogger.error('Failed to schedule tiffin reminder: $e', context: 'Notification');
     }
-
-    const details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        tiffinChannelId,
-        'Tiffin Reminders',
-        channelDescription: 'Daily reminder to confirm meal delivery',
-        importance: Importance.high,
-        priority: Priority.high,
-      ),
-    );
-
-    await _plugin.zonedSchedule(
-      id,
-      'Tiffin Reminder ($mealType)',
-      'Did you receive your $mealType from $providerName?',
-      scheduledDate,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'tiffin:$id',
-    );
   }
 
   /// Schedule water reminder intervals
@@ -116,10 +176,8 @@ class NotificationService {
     required int endHour,
     required int endMinute,
   }) async {
-    // Cancel existing water reminders (IDs 1000..1050)
-    for (var i = 1000; i < 1050; i++) {
-      await _plugin.cancel(i);
-    }
+    if (kIsWeb) return;
+    await cancelWaterReminders();
 
     final now = tz.TZDateTime.now(tz.local);
     int notificationId = 1000;
@@ -157,19 +215,30 @@ class NotificationService {
         target = target.add(const Duration(days: 1));
       }
 
-      await _plugin.zonedSchedule(
-        notificationId,
-        'Time to Hydrate! 💧',
-        'Drink a glass of water to hit your daily goal.',
-        target,
-        details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: 'water:$notificationId',
-      );
+      try {
+        await _plugin.zonedSchedule(
+          notificationId,
+          'Time to Hydrate! 💧',
+          'Drink a glass of water to hit your daily goal.',
+          target,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time,
+          payload: 'water:$notificationId',
+        );
+      } catch (e) {
+        AppLogger.error('Error scheduling water reminder slot $notificationId: $e', context: 'Notification');
+      }
 
       currentSlot = currentSlot.add(Duration(minutes: intervalMinutes));
       notificationId++;
+    }
+  }
+
+  /// Cancel all scheduled water reminders (IDs 1000..1050)
+  Future<void> cancelWaterReminders() async {
+    for (var i = 1000; i < 1050; i++) {
+      await _plugin.cancel(i);
     }
   }
 
@@ -179,6 +248,7 @@ class NotificationService {
     required String title,
     required DateTime dueAt,
   }) async {
+    if (kIsWeb) return;
     final scheduledDate = tz.TZDateTime.from(dueAt, tz.local);
     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
 
@@ -192,15 +262,68 @@ class NotificationService {
       ),
     );
 
-    await _plugin.zonedSchedule(
-      id,
-      'Task Due: $title',
-      'Don\'t forget: $title',
-      scheduledDate,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: 'todo:$id',
+    try {
+      await _plugin.zonedSchedule(
+        id,
+        'Task Due: $title',
+        'Don\'t forget: $title',
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: 'todo:$id',
+      );
+    } catch (e) {
+      AppLogger.error('Failed to schedule todo reminder: $e', context: 'Notification');
+    }
+  }
+
+  /// Show instant budget alert
+  Future<void> showBudgetAlert({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    if (kIsWeb) return;
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        billChannelId,
+        'Budget & Bill Alerts',
+        channelDescription: 'Monthly budget warnings and bill due alerts',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
     );
+
+    try {
+      await _plugin.show(id, title, body, details, payload: 'budget:$id');
+    } catch (e) {
+      AppLogger.error('Failed to show budget alert: $e', context: 'Notification');
+    }
+  }
+
+  /// Show transaction detected notification
+  Future<void> showTxnDetectedNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    if (kIsWeb) return;
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        txnChannelId,
+        'Transaction Detected',
+        channelDescription: 'Auto-detected expense confirmations',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+    );
+
+    try {
+      await _plugin.show(id, title, body, details, payload: payload);
+    } catch (e) {
+      AppLogger.error('Failed to show txn detected notification: $e', context: 'Notification');
+    }
   }
 
   /// Cancel notification by ID
@@ -208,7 +331,7 @@ class NotificationService {
     await _plugin.cancel(id);
   }
 
-  /// Cancel all
+  /// Cancel all notifications
   Future<void> cancelAll() async {
     await _plugin.cancelAll();
   }
