@@ -1,14 +1,19 @@
-/// Water Tracker screen with progress ring, quick glass logger,
-/// 7-day streak history, and hydration settings modal.
+/// Water Tracker screen — minimal: gradient progress ring + "+1 Glass" button + settings.
 library;
+
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:bachelor_buddy/core/theme/app_theme.dart';
 import 'package:bachelor_buddy/features/water/domain/water_providers.dart';
 import 'package:bachelor_buddy/features/water/data/water_repository.dart';
+
+// ─── Gradient / Glow Colors ────────────────────────────────────────────────
+const _kCyanStart = Color(0xFF00E5FF);
+const _kTealEnd = Color(0xFF00F5D4);
+const _kTrackColor = Color(0xFF222332);
 
 class WaterScreen extends ConsumerWidget {
   const WaterScreen({super.key});
@@ -16,11 +21,10 @@ class WaterScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusAsync = ref.watch(todayWaterStatusProvider);
-    final historyAsync = ref.watch(weeklyWaterHistoryProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Water Reminder'),
+        title: const Text('Water Tracker'),
         actions: [
           IconButton(
             icon: const Icon(Icons.tune),
@@ -28,49 +32,10 @@ class WaterScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 120),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-
-            // Main Progress Card with Circular Ring
-            statusAsync.when(
-              data: (status) => _WaterProgressCard(status: status),
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(40),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              error: (err, _) => Center(child: Text('Error: $err')),
-            ),
-            const SizedBox(height: 20),
-
-            // Quick Add Buttons
-            statusAsync.when(
-              data: (status) => _QuickAddButtons(glassMl: status.glassMl),
-              loading: () => const SizedBox.shrink(),
-              error: (e, s) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 24),
-
-            // 7-Day History Chart
-            historyAsync.when(
-              data: (history) => _WeeklyHistoryCard(history: history),
-              loading: () => const SizedBox.shrink(),
-              error: (e, s) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 16),
-
-            // Today's Logs Timeline
-            statusAsync.when(
-              data: (status) => _TodayLogsList(status: status),
-              loading: () => const SizedBox.shrink(),
-              error: (e, s) => const SizedBox.shrink(),
-            ),
-          ],
-        ),
+      body: statusAsync.when(
+        data: (status) => _WaterBody(status: status),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text('Error: $err')),
       ),
     );
   }
@@ -88,287 +53,259 @@ class WaterScreen extends ConsumerWidget {
   }
 }
 
-class _WaterProgressCard extends StatelessWidget {
+// ─── Main Body ─────────────────────────────────────────────────────────────
+
+class _WaterBody extends ConsumerWidget {
   final TodayWaterStatus status;
 
-  const _WaterProgressCard({required this.status});
+  const _WaterBody({required this.status});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.read(waterRepositoryProvider);
     final percent = (status.progress * 100).round();
+    final remaining = (status.goalMl - status.intakeMl).clamp(0, status.goalMl);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          children: [
-            SizedBox(
-              width: 180,
-              height: 180,
-              child: Stack(
-                alignment: Alignment.center,
+    return Column(
+      children: [
+        const Spacer(flex: 2),
+
+        // ── Progress Ring ──────────────────────────────────────────────
+        SizedBox(
+          width: 220,
+          height: 220,
+          child: CustomPaint(
+            painter: _HydrationRingPainter(progress: status.progress),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 180,
-                    height: 180,
-                    child: CircularProgressIndicator(
-                      value: status.progress,
-                      strokeWidth: 14,
-                      backgroundColor: Colors.white.withValues(alpha: 0.08),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(AppColors.secondary),
-                      strokeCap: StrokeCap.round,
+                  // Water drop icon in tinted circle
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _kTealEnd.withValues(alpha: 0.15),
+                      border: Border.all(
+                        color: _kTealEnd.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.water_drop,
+                      color: _kTealEnd,
+                      size: 20,
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.water_drop,
-                          color: AppColors.secondary, size: 36),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$percent%',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineLarge
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                  const SizedBox(height: 6),
+
+                  // Large ml amount
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: _formatMl(status.intakeMl),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                        ),
+                        TextSpan(
+                          text: ' ml',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: _kTealEnd,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Goal text
+                  Text(
+                    '/ ${_formatMl(status.goalMl)} ml',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white38,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Percentage pill badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: _kTealEnd.withValues(alpha: 0.10),
+                      border: Border.all(
+                        color: _kTealEnd.withValues(alpha: 0.25),
                       ),
-                      Text(
-                        '${status.intakeMl} / ${status.goalMl} ml',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: Colors.white60),
+                    ),
+                    child: Text(
+                      '$percent% of daily goal',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: _kTealEnd,
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.local_drink,
-                    size: 18, color: AppColors.secondary),
-                const SizedBox(width: 6),
-                Text(
-                  '${status.glassesDrank} of ${status.totalGlasses} glasses drank',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-}
 
-class _QuickAddButtons extends ConsumerWidget {
-  final int glassMl;
+        const SizedBox(height: 16),
 
-  const _QuickAddButtons({required this.glassMl});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final repo = ref.read(waterRepositoryProvider);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              height: 52,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
-                  foregroundColor: Colors.black87,
-                ),
-                onPressed: () async {
-                  await repo.addWater(glassMl);
-                },
-                icon: const Icon(Icons.local_drink),
-                label: Text(
-                  '+1 Glass (${glassMl}ml)',
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold),
-                ),
+        // Remaining / glasses info
+        Text(
+          '${status.glassesDrank} glasses \u2022 ${_formatMl(remaining)} ml left',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.white54,
               ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            flex: 2,
-            child: SizedBox(
-              height: 52,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.secondary,
-                  side: const BorderSide(color: AppColors.secondary),
+        ),
+
+        const Spacer(flex: 3),
+
+        // ── +1 Glass Button ────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00D2B4), _kTealEnd, Color(0xFF06B6D4)],
                 ),
-                onPressed: () async {
-                  await repo.addWater(500);
-                },
-                icon: const Icon(Icons.water, size: 18),
-                label: const Text(
-                  '+500ml',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: _kTealEnd.withValues(alpha: 0.30),
+                    blurRadius: 24,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WeeklyHistoryCard extends StatelessWidget {
-  final List<DailyWaterSummary> history;
-
-  const _WeeklyHistoryCard({required this.history});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Last 7 Days',
-                    style: Theme.of(context).textTheme.titleSmall),
-                Text(
-                  'Goal: 2.5L / day',
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: Colors.white54),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: history.map((day) {
-                final ratio = day.goalMl > 0
-                    ? (day.totalMl / day.goalMl).clamp(0.0, 1.0)
-                    : 0.0;
-                final isReached = day.reachedGoal;
-                final dayLabel = DateFormat('E').format(day.date).substring(0, 1);
-
-                return Column(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: 28,
-                        height: 80 * ratio,
-                        decoration: BoxDecoration(
-                          color: isReached
-                              ? AppColors.secondary
-                              : AppColors.secondary.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(6),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () async {
+                    await repo.addWater(status.glassMl);
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.local_drink,
+                          color: Color(0xFF0A1A1A), size: 24),
+                      const SizedBox(width: 10),
+                      Text(
+                        '+1 Glass (${status.glassMl}ml)',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0A1A1A),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      dayLabel,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight:
-                            isReached ? FontWeight.bold : FontWeight.normal,
-                        color: isReached ? Colors.white : Colors.white54,
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ],
+          ),
         ),
-      ),
+
+        const SizedBox(height: 40),
+      ],
     );
+  }
+
+  String _formatMl(int ml) {
+    if (ml >= 1000) {
+      return '${(ml / 1000).toStringAsFixed(ml % 1000 == 0 ? 0 : 1)}k';
+    }
+    return '$ml';
   }
 }
 
-class _TodayLogsList extends ConsumerWidget {
-  final TodayWaterStatus status;
+// ─── Custom Progress Ring Painter ──────────────────────────────────────────
 
-  const _TodayLogsList({required this.status});
+class _HydrationRingPainter extends CustomPainter {
+  final double progress;
+
+  _HydrationRingPainter({required this.progress});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (status.logs.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.shortestSide / 2) - 8;
+    const strokeWidth = 12.0;
+    const startAngle = -math.pi / 2; // 12 o'clock
 
-    final repo = ref.read(waterRepositoryProvider);
+    // Track ring
+    final trackPaint = Paint()
+      ..color = _kTrackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Today\'s History',
-                style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: status.logs.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final log = status.logs[index];
-                final time =
-                    DateTime.fromMillisecondsSinceEpoch(log.loggedAt).toLocal();
+    canvas.drawCircle(center, radius, trackPaint);
 
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.water_drop,
-                      color: AppColors.secondary, size: 20),
-                  title: Text('${log.amountMl} ml'),
-                  subtitle: Text(DateFormat('h:mm a').format(time)),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline,
-                        size: 18, color: Colors.white38),
-                    onPressed: () async {
-                      await repo.deleteWaterLog(log.id);
-                    },
-                  ),
-                );
-              },
-            ),
+    // Progress arc with gradient
+    if (progress > 0) {
+      final sweepAngle = 2 * math.pi * progress.clamp(0.0, 1.0);
+      final rect = Rect.fromCircle(center: center, radius: radius);
+
+      // Glow layer
+      final glowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth + 6
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
+        ..shader = SweepGradient(
+          startAngle: startAngle,
+          endAngle: startAngle + sweepAngle,
+          colors: [
+            _kCyanStart.withValues(alpha: 0.4),
+            _kTealEnd.withValues(alpha: 0.4),
           ],
-        ),
-      ),
-    );
+          stops: const [0.0, 1.0],
+          transform: GradientRotation(startAngle),
+        ).createShader(rect);
+
+      canvas.drawArc(rect, startAngle, sweepAngle, false, glowPaint);
+
+      // Main arc
+      final arcPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round
+        ..shader = SweepGradient(
+          startAngle: startAngle,
+          endAngle: startAngle + sweepAngle,
+          colors: const [_kCyanStart, _kTealEnd],
+          stops: const [0.0, 1.0],
+          transform: GradientRotation(startAngle),
+        ).createShader(rect);
+
+      canvas.drawArc(rect, startAngle, sweepAngle, false, arcPaint);
+    }
   }
+
+  @override
+  bool shouldRepaint(_HydrationRingPainter old) => old.progress != progress;
 }
+
+
+// ─── Settings Bottom Sheet ─────────────────────────────────────────────────
 
 class _WaterSettingsSheet extends ConsumerStatefulWidget {
   const _WaterSettingsSheet();
