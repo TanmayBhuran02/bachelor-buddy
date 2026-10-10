@@ -66,8 +66,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.all(16),
                 child: TextButton(
                   onPressed: () => _finishOnboarding(context),
-                  child: const Text('Skip',
-                      style: TextStyle(color: Colors.white54)),
+                  child: const Text('SKIP',
+                      style: TextStyle(color: Color(0xFF777777), letterSpacing: 1)),
                 ),
               ),
             ),
@@ -88,23 +88,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 120,
-                          height: 120,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
-                            color: data.iconColor.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
+                            color: const Color(0xFF1F1F1F),
+                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(color: const Color(0xFF3A3A3A)),
                           ),
                           child: Icon(data.icon,
-                              size: 60, color: data.iconColor),
+                              size: 48, color: data.iconColor),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 36),
                         Text(
-                          data.title,
+                          data.title.toUpperCase(),
                           textAlign: TextAlign.center,
                           style: Theme.of(context)
                               .textTheme
-                              .headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.8),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -113,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
-                              ?.copyWith(color: Colors.white60, height: 1.5),
+                              ?.copyWith(color: const Color(0xFF888888), height: 1.5),
                         ),
                       ],
                     ),
@@ -135,12 +136,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       (i) => Container(
                         margin: const EdgeInsets.only(right: 6),
                         width: _currentPage == i ? 24 : 8,
-                        height: 8,
+                        height: 4,
                         decoration: BoxDecoration(
                           color: _currentPage == i
-                              ? AppColors.primary
-                              : Colors.white24,
-                          borderRadius: BorderRadius.circular(4),
+                              ? AppColors.paperWhite
+                              : const Color(0xFF3A3A3A),
+                          borderRadius: BorderRadius.circular(1),
                         ),
                       ),
                     ),
@@ -162,7 +163,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 14),
                     ),
-                    child: Text(isLastPage ? 'Get Started' : 'Next'),
+                    child: Text(
+                      isLastPage ? 'GET STARTED' : 'NEXT',
+                      style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+                    ),
                   ),
                 ],
               ),

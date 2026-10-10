@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('SETTINGS'),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -178,7 +178,7 @@ class SettingsScreen extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: AppColors.cardDark,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
       ),
       builder: (ctx) {
         final logs = AppLogger.recentLogs.reversed.toList();
@@ -193,7 +193,7 @@ class SettingsScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Diagnostics Logs',
+                    Text('DIAGNOSTICS LOGS',
                         style: Theme.of(context).textTheme.titleMedium),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -206,15 +206,15 @@ class SettingsScreen extends ConsumerWidget {
                   child: logs.isEmpty
                       ? const Center(
                           child: Text('No diagnostic logs captured yet',
-                              style: TextStyle(color: Colors.white38)),
+                              style: TextStyle(color: Color(0xFF555555))),
                         )
                       : ListView.builder(
                           itemCount: logs.length,
                           itemBuilder: (context, index) {
                             final log = logs[index];
                             final color = switch (log.level) {
-                              LogLevel.info => Colors.white70,
-                              LogLevel.warning => Colors.amber,
+                              LogLevel.info => const Color(0xFF888888),
+                              LogLevel.warning => AppColors.warning,
                               LogLevel.error => AppColors.tertiary,
                             };
 
@@ -224,7 +224,6 @@ class SettingsScreen extends ConsumerWidget {
                                 '[${log.timestamp.toIso8601String().substring(11, 19)}] [${log.context}] ${log.message}',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  fontFamily: 'monospace',
                                   color: color,
                                 ),
                               ),
@@ -254,7 +253,7 @@ class _SectionHeader extends StatelessWidget {
         title,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               letterSpacing: 1.2,
-              color: AppColors.primary,
+              color: AppColors.kraftBrown,
               fontWeight: FontWeight.bold,
             ),
       ),

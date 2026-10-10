@@ -1,4 +1,4 @@
-/// Bottom navigation shell scaffold.
+/// Bottom navigation shell scaffold — raw aesthetic.
 library;
 
 import 'package:flutter/material.dart';
@@ -26,39 +26,46 @@ class ShellScaffold extends StatelessWidget {
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        onDestinationSelected: (i) {
-          final routes = ['/home', '/expenses', '/tiffin', '/todo', '/water'];
-          context.go(routes[i]);
-        },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: AppColors.primary),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(color: Color(0xFF3A3A3A), width: 1),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet, color: AppColors.primary),
-            label: 'Expenses',
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.lunch_dining_outlined),
-            selectedIcon: Icon(Icons.lunch_dining, color: AppColors.primary),
-            label: 'Tiffin',
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.checklist_outlined),
-            selectedIcon: Icon(Icons.checklist, color: AppColors.primary),
-            label: 'To-do',
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.water_drop_outlined),
-            selectedIcon: Icon(Icons.water_drop, color: AppColors.primary),
-            label: 'Water',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: index,
+          onDestinationSelected: (i) {
+            final routes = ['/home', '/expenses', '/tiffin', '/todo', '/water'];
+            context.go(routes[i]);
+          },
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.home_outlined, size: 22),
+              selectedIcon: Icon(Icons.home, color: AppColors.paperWhite, size: 22),
+              label: 'HOME',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.account_balance_wallet_outlined, size: 22),
+              selectedIcon: Icon(Icons.account_balance_wallet, color: AppColors.paperWhite, size: 22),
+              label: 'SPEND',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.lunch_dining_outlined, size: 22),
+              selectedIcon: Icon(Icons.lunch_dining, color: AppColors.paperWhite, size: 22),
+              label: 'TIFFIN',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.checklist_outlined, size: 22),
+              selectedIcon: Icon(Icons.checklist, color: AppColors.paperWhite, size: 22),
+              label: 'TASKS',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.water_drop_outlined, size: 22),
+              selectedIcon: Icon(Icons.water_drop, color: AppColors.paperWhite, size: 22),
+              label: 'WATER',
+            ),
+          ],
+        ),
       ),
     );
   }

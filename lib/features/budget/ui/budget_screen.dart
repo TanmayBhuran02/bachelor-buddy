@@ -25,7 +25,7 @@ class BudgetScreen extends ConsumerWidget {
     return Scaffold(
       key: const ValueKey('budget_scaffold'),
       appBar: AppBar(
-        title: const Text('Budget & Recurring'),
+        title: const Text('BUDGET & RECURRING'),
         actions: [
           IconButton(
             key: const ValueKey('budget_edit_button'),
@@ -71,8 +71,8 @@ class BudgetScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'Category Budgets',
-                style: Theme.of(context).textTheme.titleMedium,
+                'CATEGORY BUDGETS',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(letterSpacing: 0.8),
               ),
             ),
             const SizedBox(height: 8),
@@ -95,13 +95,13 @@ class BudgetScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Recurring Expenses & Rent',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    'RECURRING EXPENSES & RENT',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(letterSpacing: 0.8),
                   ),
                   TextButton.icon(
                     onPressed: () => _showAddRecurringModal(context, ref),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add Bill'),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text('ADD BILL'),
                   ),
                 ],
               ),
@@ -126,13 +126,13 @@ class BudgetScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Set Overall Monthly Budget'),
+        title: const Text('SET MONTHLY BUDGET'),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           autofocus: true,
           decoration: const InputDecoration(
-            labelText: 'Budget Limit (₹)',
+            labelText: 'BUDGET LIMIT (₹)',
             prefixText: '₹ ',
             hintText: 'e.g. 25000',
           ),
@@ -140,7 +140,7 @@ class BudgetScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('CANCEL'),
           ),
           FilledButton(
             onPressed: () async {
@@ -151,7 +151,7 @@ class BudgetScreen extends ConsumerWidget {
               }
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Save'),
+            child: const Text('SAVE'),
           ),
         ],
       ),
@@ -164,7 +164,7 @@ class BudgetScreen extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: AppColors.cardDark,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
       ),
       builder: (ctx) => const _AddRecurringExpenseSheet(),
     );
@@ -189,9 +189,9 @@ class _OverallBudgetCard extends StatelessWidget {
     if (overview.percentage > 0.9) {
       progressColor = AppColors.tertiary; // Red
     } else if (overview.percentage > 0.75) {
-      progressColor = Colors.amber; // Warning
+      progressColor = AppColors.warning; // Amber
     } else {
-      progressColor = AppColors.secondary; // Green
+      progressColor = AppColors.secondary; // Teal
     }
 
     return Card(
@@ -212,17 +212,17 @@ class _OverallBudgetCard extends StatelessWidget {
                       'TOTAL MONTHLY BUDGET',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             letterSpacing: 1.2,
-                            color: Colors.white54,
+                            color: const Color(0xFF777777),
                           ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       hasLimit
                           ? Money.format(overview.limitPaise, showDecimal: false)
-                          : 'Not set',
+                          : 'NOT SET',
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppColors.paperWhite,
                           ),
                     ),
                   ],
@@ -235,15 +235,12 @@ class _OverallBudgetCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Progress bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: hasLimit ? overview.percentage.clamp(0.0, 1.0) : 0.0,
-                minHeight: 10,
-                backgroundColor: Colors.white.withValues(alpha: 0.08),
-                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-              ),
+            // Progress bar (square corners)
+            LinearProgressIndicator(
+              value: hasLimit ? overview.percentage.clamp(0.0, 1.0) : 0.0,
+              minHeight: 8,
+              backgroundColor: const Color(0xFF2A2A2A),
+              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
             ),
             const SizedBox(height: 16),
 
@@ -252,11 +249,11 @@ class _OverallBudgetCard extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'Spent: ${Money.format(overview.spentPaise, showDecimal: false)} ($pct%)',
+                    'SPENT: ${Money.format(overview.spentPaise, showDecimal: false)} ($pct%)',
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
-                        ?.copyWith(color: Colors.white70),
+                        ?.copyWith(color: const Color(0xFF888888)),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -264,14 +261,15 @@ class _OverallBudgetCard extends StatelessWidget {
                 Flexible(
                   child: Text(
                     hasLimit
-                        ? 'Left: ${Money.format(overview.remainingPaise, showDecimal: false)}'
+                        ? 'LEFT: ${Money.format(overview.remainingPaise, showDecimal: false)}'
                         : '',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: overview.remainingPaise < 0
                           ? AppColors.tertiary
                           : AppColors.secondary,
+                      letterSpacing: 0.5,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -284,38 +282,40 @@ class _OverallBudgetCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFF1F1F1F),
+                borderRadius: BorderRadius.circular(2),
+                border: Border.all(color: const Color(0xFF3A3A3A)),
               ),
               child: Row(
                 children: [
                   const Icon(Icons.savings_outlined,
-                      color: AppColors.primary, size: 22),
+                      color: AppColors.kraftBrown, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Safe-to-Spend per day',
-                          style: TextStyle(fontSize: 11, color: Colors.white60),
+                          'SAFE-TO-SPEND / DAY',
+                          style: TextStyle(fontSize: 10, color: Color(0xFF777777), letterSpacing: 0.8),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           hasLimit
-                              ? '${Money.format(overview.safeToSpendPerDayPaise, showDecimal: false)} / day'
+                              ? '${Money.format(overview.safeToSpendPerDayPaise, showDecimal: false)} / DAY'
                               : 'Set a monthly budget to calculate',
                           style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppColors.paperWhite,
                           ),
                         ),
                       ],
                     ),
                   ),
                   Text(
-                    '${overview.remainingDays} days left',
-                    style: const TextStyle(fontSize: 11, color: Colors.white38),
+                    '${overview.remainingDays} DAYS LEFT',
+                    style: const TextStyle(fontSize: 10, color: Color(0xFF555555), letterSpacing: 0.5),
                   ),
                 ],
               ),
@@ -338,13 +338,13 @@ class _SpendingPieChartCard extends StatelessWidget {
     if (totalSpent <= 0) return const SizedBox.shrink();
 
     final palette = [
-      AppColors.primary,
+      AppColors.kraftBrown,
       AppColors.secondary,
       AppColors.tertiary,
-      Colors.orange,
-      Colors.purpleAccent,
-      Colors.cyan,
-      Colors.lime,
+      AppColors.warning,
+      const Color(0xFF5E81AC),
+      const Color(0xFF88C0D0),
+      const Color(0xFFB48EAD),
     ];
 
     return Card(
@@ -355,8 +355,8 @@ class _SpendingPieChartCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Spending Distribution',
-                style: Theme.of(context).textTheme.titleSmall),
+            Text('SPENDING DISTRIBUTION',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(letterSpacing: 0.8)),
             const SizedBox(height: 20),
             SizedBox(
               height: 160,
@@ -378,7 +378,7 @@ class _SpendingPieChartCard extends StatelessWidget {
                       titleStyle: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.paperWhite,
                       ),
                     );
                   }).toList(),
@@ -401,13 +401,13 @@ class _SpendingPieChartCard extends StatelessWidget {
                       height: 8,
                       decoration: BoxDecoration(
                         color: color,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(1),
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text(
-                      '${item.category.name}: ${Money.format(item.spentPaise, showDecimal: false)}',
-                      style: const TextStyle(fontSize: 11, color: Colors.white70),
+                      '${item.category.name.toUpperCase()}: ${Money.format(item.spentPaise, showDecimal: false)}',
+                      style: const TextStyle(fontSize: 10, color: Color(0xFF888888), letterSpacing: 0.5),
                     ),
                   ],
                 );
@@ -445,8 +445,8 @@ class _CategoryBudgetList extends ConsumerWidget {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(item.category.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(item.category.name.toUpperCase(),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                 Text(
                   Money.format(item.spentPaise, showDecimal: false),
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -458,17 +458,14 @@ class _CategoryBudgetList extends ConsumerWidget {
               children: [
                 const SizedBox(height: 6),
                 if (hasLimit) ...[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: item.percentage.clamp(0.0, 1.0),
-                      minHeight: 6,
-                      backgroundColor: Colors.white.withValues(alpha: 0.08),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        item.percentage > 1.0
-                            ? AppColors.tertiary
-                            : AppColors.secondary,
-                      ),
+                  LinearProgressIndicator(
+                    value: item.percentage.clamp(0.0, 1.0),
+                    minHeight: 6,
+                    backgroundColor: const Color(0xFF2A2A2A),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      item.percentage > 1.0
+                          ? AppColors.tertiary
+                          : AppColors.secondary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -476,21 +473,21 @@ class _CategoryBudgetList extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Limit: ${Money.format(item.limitPaise!, showDecimal: false)} ($pct%)',
+                        'LIMIT: ${Money.format(item.limitPaise!, showDecimal: false)} ($pct%)',
                         style: const TextStyle(
-                            fontSize: 10, color: Colors.white54),
+                            fontSize: 10, color: Color(0xFF777777), letterSpacing: 0.5),
                       ),
-                      Text(
-                        'Tap to edit',
-                        style: const TextStyle(
-                            fontSize: 10, color: AppColors.primary),
+                      const Text(
+                        'TAP TO EDIT →',
+                        style: TextStyle(
+                            fontSize: 9, color: Color(0xFF888888), letterSpacing: 0.8),
                       ),
                     ],
                   ),
                 ] else ...[
                   const Text(
                     'No budget limit set • Tap to set limit',
-                    style: TextStyle(fontSize: 11, color: Colors.white38),
+                    style: TextStyle(fontSize: 11, color: Color(0xFF555555)),
                   ),
                 ],
               ],
@@ -510,20 +507,20 @@ class _CategoryBudgetList extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Budget for ${item.category.name}'),
+        title: Text('BUDGET FOR ${item.category.name.toUpperCase()}'),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           autofocus: true,
           decoration: const InputDecoration(
-            labelText: 'Monthly Limit (₹)',
+            labelText: 'MONTHLY LIMIT (₹)',
             prefixText: '₹ ',
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('CANCEL'),
           ),
           FilledButton(
             onPressed: () async {
@@ -536,7 +533,7 @@ class _CategoryBudgetList extends ConsumerWidget {
               );
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Save'),
+            child: const Text('SAVE'),
           ),
         ],
       ),
@@ -552,11 +549,11 @@ class _RecurringExpensesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (items.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Text(
           'No recurring bills added. Add rent, subscriptions, or WiFi bills to auto-generate them every month.',
-          style: TextStyle(fontSize: 12, color: Colors.white38),
+          style: TextStyle(fontSize: 11, color: Color(0xFF555555)),
         ),
       );
     }
@@ -590,16 +587,17 @@ class _RecurringExpensesList extends ConsumerWidget {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+                  color: const Color(0xFF1F1F1F),
+                  borderRadius: BorderRadius.circular(2),
+                  border: Border.all(color: const Color(0xFF3A3A3A)),
                 ),
-                child: const Icon(Icons.repeat, color: AppColors.primary, size: 20),
+                child: const Icon(Icons.repeat, color: AppColors.kraftBrown, size: 20),
               ),
-              title: Text(rec.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              title: Text(rec.title.toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               subtitle: Text(
-                'Due on day ${rec.dayOfMonth} of each month',
-                style: const TextStyle(fontSize: 11, color: Colors.white54),
+                'DUE ON DAY ${rec.dayOfMonth} OF MONTH',
+                style: const TextStyle(fontSize: 10, color: Color(0xFF777777), letterSpacing: 0.5),
               ),
               trailing: Text(
                 Money.format(rec.amountPaise, showDecimal: false),
@@ -656,8 +654,8 @@ class _AddRecurringExpenseSheetState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Add Recurring Bill / Rent',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text('ADD RECURRING BILL / RENT',
+                  style: Theme.of(context).textTheme.titleMedium),
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
@@ -670,7 +668,7 @@ class _AddRecurringExpenseSheetState
             controller: _titleController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
-              labelText: 'Bill Title',
+              labelText: 'BILL TITLE',
               hintText: 'e.g. House Rent, WiFi, Netflix',
             ),
           ),
@@ -683,7 +681,7 @@ class _AddRecurringExpenseSheetState
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Amount (₹)',
+                    labelText: 'AMOUNT (₹)',
                     prefixText: '₹ ',
                   ),
                 ),
@@ -692,9 +690,9 @@ class _AddRecurringExpenseSheetState
               Expanded(
                 child: DropdownButtonFormField<int>(
                   initialValue: _dayOfMonth,
-                  decoration: const InputDecoration(labelText: 'Day of Month'),
+                  decoration: const InputDecoration(labelText: 'DAY OF MONTH'),
                   items: List.generate(31, (i) => i + 1).map((d) {
-                    return DropdownMenuItem(value: d, child: Text('Day $d'));
+                    return DropdownMenuItem(value: d, child: Text('DAY $d'));
                   }).toList(),
                   onChanged: (val) => setState(() => _dayOfMonth = val!),
                 ),
@@ -710,9 +708,9 @@ class _AddRecurringExpenseSheetState
               }
               return DropdownButtonFormField<String>(
                 initialValue: _selectedCategoryId,
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: const InputDecoration(labelText: 'CATEGORY'),
                 items: cats.map((c) {
-                  return DropdownMenuItem(value: c.id, child: Text(c.name));
+                  return DropdownMenuItem(value: c.id, child: Text(c.name.toUpperCase()));
                 }).toList(),
                 onChanged: (val) => setState(() => _selectedCategoryId = val),
               );
@@ -749,7 +747,7 @@ class _AddRecurringExpenseSheetState
 
                 if (context.mounted) Navigator.pop(context);
               },
-              child: const Text('Add Recurring Bill'),
+              child: const Text('ADD RECURRING BILL'),
             ),
           ),
         ],

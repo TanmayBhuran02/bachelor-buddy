@@ -25,11 +25,12 @@ class HomeScreen extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Bachelor Buddy'),
+            const Text('BACHELOR BUDDY'),
             Text(
-              'Good ${_greeting()}, Buddy',
+              _greeting().toUpperCase(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white60,
+                    color: AppColors.kraftBrown,
+                    letterSpacing: 1,
                   ),
             ),
           ],
@@ -71,9 +72,9 @@ class HomeScreen extends ConsumerWidget {
 
   String _greeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'morning';
-    if (hour < 17) return 'afternoon';
-    return 'evening';
+    if (hour < 12) return 'good morning, buddy';
+    if (hour < 17) return 'good afternoon, buddy';
+    return 'good evening, buddy';
   }
 }
 
@@ -93,7 +94,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
         if (overview.percentage > 0.9) {
           progressColor = AppColors.tertiary;
         } else if (overview.percentage > 0.75) {
-          progressColor = Colors.amber;
+          progressColor = AppColors.warning;
         } else {
           progressColor = AppColors.secondary;
         }
@@ -102,7 +103,7 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
           key: const ValueKey('budget_overview_card'),
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(2),
             onTap: () => context.push('/budget'),
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -112,16 +113,15 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Monthly Budget',
+                      Text('MONTHLY BUDGET',
                           style: Theme.of(context).textTheme.titleMedium),
                       Row(
                         children: [
-                          Text('Details',
+                          Text('DETAILS →',
                               style: TextStyle(
-                                  fontSize: 12, color: AppColors.primary)),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.arrow_forward_ios,
-                              size: 12, color: AppColors.primary),
+                                  fontSize: 10,
+                                  color: const Color(0xFF888888),
+                                  letterSpacing: 1)),
                         ],
                       ),
                     ],
@@ -148,21 +148,18 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyLarge
-                                ?.copyWith(color: Colors.white38),
+                                ?.copyWith(color: const Color(0xFF555555)),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 8,
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
-                      valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                    ),
+                  LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 8,
+                    backgroundColor: const Color(0xFF2A2A2A),
+                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -170,7 +167,9 @@ class _LiveBudgetOverviewCard extends ConsumerWidget {
                         ? 'Safe to spend: ${Money.format(overview.safeToSpendPerDayPaise, showDecimal: false)}/day (${overview.remainingDays} days left)'
                         : 'Tap to set monthly budget limit',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: hasLimit ? AppColors.secondary : Colors.white54,
+                          color: hasLimit
+                              ? AppColors.secondary
+                              : const Color(0xFF777777),
                         ),
                   ),
                 ],
@@ -194,10 +193,10 @@ class _QuickActionsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actions = [
-      ('Add Expense', Icons.account_balance_wallet, '/expenses/new'),
-      ('Tiffin', Icons.lunch_dining, '/tiffin'),
-      ('Add Task', Icons.add_task, '/todo/new'),
-      ('Log Water', Icons.water_drop, '/water'),
+      ('ADD EXP', Icons.account_balance_wallet, '/expenses/new'),
+      ('TIFFIN', Icons.lunch_dining, '/tiffin'),
+      ('ADD TASK', Icons.add_task, '/todo/new'),
+      ('WATER', Icons.water_drop, '/water'),
     ];
 
     return Padding(
@@ -211,19 +210,21 @@ class _QuickActionsRow extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    width: 54,
-                    height: 54,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
+                      color: const Color(0xFF1F1F1F),
+                      borderRadius: BorderRadius.circular(2),
+                      border: Border.all(color: const Color(0xFF3A3A3A)),
                     ),
-                    child: Icon(a.$2, color: AppColors.primary, size: 24),
+                    child: Icon(a.$2, color: AppColors.kraftBrown, size: 22),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     a.$1,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white70,
+                          color: const Color(0xFF888888),
+                          letterSpacing: 0.8,
                         ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -260,14 +261,17 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                     const Icon(Icons.lunch_dining,
                         color: AppColors.secondary, size: 20),
                     const SizedBox(width: 8),
-                    Text("Today's Tiffin",
+                    Text("TODAY'S TIFFIN",
                         style: Theme.of(context).textTheme.titleSmall),
                   ],
                 ),
                 GestureDetector(
                   onTap: () => context.push('/tiffin'),
-                  child: const Text('View All',
-                      style: TextStyle(fontSize: 12, color: AppColors.primary)),
+                  child: Text('VIEW ALL →',
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: const Color(0xFF888888),
+                          letterSpacing: 1)),
                 ),
               ],
             ),
@@ -279,7 +283,8 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Text(
                       'No active tiffin plans. Tap to configure.',
-                      style: TextStyle(fontSize: 12, color: Colors.white38),
+                      style:
+                          TextStyle(fontSize: 11, color: Color(0xFF555555)),
                     ),
                   );
                 }
@@ -289,10 +294,16 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                     final isReceived = p.log?.status == 'received';
                     final isSkipped = p.log?.status == 'skipped';
                     final status = isReceived
-                        ? 'Received'
+                        ? 'RECEIVED'
                         : isSkipped
-                            ? 'Skipped'
-                            : 'Pending';
+                            ? 'SKIPPED'
+                            : 'PENDING';
+
+                    final statusColor = isReceived
+                        ? AppColors.secondary
+                        : isSkipped
+                            ? AppColors.tertiary
+                            : AppColors.warning;
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
@@ -304,17 +315,13 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                                 : isSkipped
                                     ? Icons.cancel
                                     : Icons.pending,
-                            color: isReceived
-                                ? AppColors.secondary
-                                : isSkipped
-                                    ? AppColors.tertiary
-                                    : Colors.amber,
+                            color: statusColor,
                             size: 18,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '${p.plan.mealType.toUpperCase()} - ${p.plan.providerName}',
+                              '${p.plan.mealType.toUpperCase()} — ${p.plan.providerName}',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
@@ -322,13 +329,8 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: (isReceived
-                                      ? AppColors.secondary
-                                      : isSkipped
-                                          ? AppColors.tertiary
-                                          : Colors.amber)
-                                  .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
+                              color: statusColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                             child: Text(
                               status,
@@ -336,11 +338,8 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                                   .textTheme
                                   .labelSmall
                                   ?.copyWith(
-                                    color: isReceived
-                                        ? AppColors.secondary
-                                        : isSkipped
-                                            ? AppColors.tertiary
-                                            : Colors.amber,
+                                    color: statusColor,
+                                    letterSpacing: 0.8,
                                   ),
                             ),
                           ),
@@ -381,22 +380,21 @@ class _LiveWaterProgressCard extends ConsumerWidget {
 
             return Row(
               children: [
+                // Raw square progress indicator
                 SizedBox(
                   width: 58,
                   height: 58,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        value: status.progress,
-                        strokeWidth: 6,
-                        backgroundColor: Colors.white.withValues(alpha: 0.1),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppColors.secondary),
-                      ),
-                      Text('$percent%',
-                          style: Theme.of(context).textTheme.labelSmall),
-                    ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      border: Border.all(color: const Color(0xFF3A3A3A)),
+                    ),
+                    child: Center(
+                      child: Text('$percent%',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: AppColors.secondary,
+                              )),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -407,9 +405,9 @@ class _LiveWaterProgressCard extends ConsumerWidget {
                       Text('${status.intakeMl} / ${status.goalMl} ml',
                           style: Theme.of(context).textTheme.titleSmall),
                       Text(
-                        '${status.glassesDrank} glasses drank today',
+                        '${status.glassesDrank} glasses today',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white60,
+                              color: const Color(0xFF888888),
                             ),
                       ),
                     ],
@@ -422,9 +420,11 @@ class _LiveWaterProgressCard extends ConsumerWidget {
                     await repo.addWater(status.glassMl);
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor:
-                        AppColors.secondary.withValues(alpha: 0.15),
+                    backgroundColor: AppColors.secondary.withValues(alpha: 0.12),
                     foregroundColor: AppColors.secondary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                   child: Text('+${status.glassMl}ml'),
                 ),
@@ -460,12 +460,15 @@ class _LiveTopTasksCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Tasks Due Today',
+                Text('TASKS DUE TODAY',
                     style: Theme.of(context).textTheme.titleSmall),
                 GestureDetector(
                   onTap: () => context.push('/todo'),
-                  child: const Text('View All',
-                      style: TextStyle(fontSize: 12, color: AppColors.primary)),
+                  child: Text('VIEW ALL →',
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: const Color(0xFF888888),
+                          letterSpacing: 1)),
                 ),
               ],
             ),
@@ -478,8 +481,9 @@ class _LiveTopTasksCard extends ConsumerWidget {
                 if (pendingTodos.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text('All tasks completed! 🎉',
-                        style: TextStyle(fontSize: 12, color: Colors.white54)),
+                    child: Text('All tasks completed.',
+                        style: TextStyle(
+                            fontSize: 11, color: Color(0xFF777777))),
                   );
                 }
 
@@ -489,7 +493,7 @@ class _LiveTopTasksCard extends ConsumerWidget {
                   children: pendingTodos.map((t) {
                     final color = switch (t.priority) {
                       0 => AppColors.tertiary,
-                      1 => Colors.amber,
+                      1 => AppColors.warning,
                       _ => AppColors.secondary,
                     };
 
@@ -497,7 +501,14 @@ class _LiveTopTasksCard extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 6),
                       child: Row(
                         children: [
-                          Icon(Icons.circle, size: 8, color: color),
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: color,
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
                           const SizedBox(width: 8),
                           Checkbox(
                             value: t.isDone,

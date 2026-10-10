@@ -162,7 +162,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Transaction' : 'Add Transaction'),
+        title: Text(isEditing ? 'EDIT TRANSACTION' : 'ADD TRANSACTION'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -174,12 +174,12 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
               segments: const [
                 ButtonSegment(
                   value: 'expense',
-                  label: Text('Expense'),
+                  label: Text('EXPENSE'),
                   icon: Icon(Icons.arrow_upward, size: 16),
                 ),
                 ButtonSegment(
                   value: 'income',
-                  label: Text('Income'),
+                  label: Text('INCOME'),
                   icon: Icon(Icons.arrow_downward, size: 16),
                 ),
               ],
@@ -194,7 +194,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             const SizedBox(height: 24),
 
             // Amount field
-            Text('Amount (₹)', style: Theme.of(context).textTheme.labelMedium),
+            Text('AMOUNT (₹)', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
             TextField(
               controller: _amountController,
@@ -231,7 +231,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             const SizedBox(height: 24),
 
             // Category selector
-            Text('Category', style: Theme.of(context).textTheme.labelMedium),
+            Text('CATEGORY', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 12),
             categoriesAsync.when(
               data: (categories) {
@@ -250,13 +250,20 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     final color = _colorForCategory(cat.colorHex);
                     return ChoiceChip(
                       selected: isSelected,
-                      avatar: Icon(
-                        _iconForCategory(cat.iconKey),
-                        size: 16,
-                        color: isSelected ? Colors.white : color,
+                      avatar: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.markerBlack : color.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: Icon(
+                          _iconForCategory(cat.iconKey),
+                          size: 14,
+                          color: isSelected ? AppColors.paperWhite : color,
+                        ),
                       ),
-                      label: Text(cat.name),
-                      selectedColor: color,
+                      label: Text(cat.name.toUpperCase()),
                       onSelected: (selected) {
                         if (selected) {
                           setState(() => _selectedCategoryId = cat.id);
@@ -272,7 +279,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             const SizedBox(height: 24),
 
             // Note
-            Text('Note / Description',
+            Text('NOTE / DESCRIPTION',
                 style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
             TextField(
@@ -288,8 +295,8 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.calendar_today),
-              title: const Text('Date'),
-              subtitle: Text(DateFormat('EEEE, d MMMM yyyy').format(_selectedDate)),
+              title: const Text('DATE'),
+              subtitle: Text(DateFormat('EEEE, d MMMM yyyy').format(_selectedDate).toUpperCase()),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
                 final picked = await showDatePicker(
@@ -307,7 +314,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             // Roommate Split tag
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Split with Roommates'),
+              title: const Text('SPLIT WITH ROOMMATES'),
               subtitle: const Text('Tag this transaction as a shared expense'),
               value: _isShared,
               onChanged: (val) => setState(() => _isShared = val),
@@ -321,11 +328,15 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
               child: FilledButton(
                 onPressed: _isLoading ? null : _save,
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.markerBlack),
+                      )
                     : Text(
-                        isEditing ? 'Update Transaction' : 'Save Transaction',
+                        isEditing ? 'UPDATE TRANSACTION' : 'SAVE TRANSACTION',
                         style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
               ),
             ),

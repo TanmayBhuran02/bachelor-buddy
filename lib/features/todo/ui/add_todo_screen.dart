@@ -113,7 +113,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Task'),
+        title: const Text('ADD TASK'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -125,7 +125,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
               controller: _titleController,
               autofocus: true,
               textCapitalization: TextCapitalization.sentences,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleMedium,
               decoration: const InputDecoration(
                 hintText: 'What needs to be done?',
                 border: InputBorder.none,
@@ -138,39 +138,40 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFF1F1F1F),
+                  borderRadius: BorderRadius.circular(2),
                   border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
+                    color: AppColors.primary.withValues(alpha: 0.5),
                   ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Icon(Icons.auto_awesome,
-                        color: AppColors.primary, size: 22),
+                        color: AppColors.primary, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Automation Detected',
+                            'AUTOMATION DETECTED',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleSmall
                                 ?.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
                                 ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
                             'When completed, automatically log ₹${((_detectedIntent!.payload['amountPaise'] as int?) ?? 0) ~/ 100} in ${_detectedIntent!.payload['categoryHint']} category.',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
-                                ?.copyWith(color: Colors.white70),
+                                ?.copyWith(color: const Color(0xFF777777)),
                           ),
                         ],
                       ),
@@ -194,33 +195,33 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
               textCapitalization: TextCapitalization.sentences,
               maxLines: 3,
               decoration: const InputDecoration(
-                labelText: 'Notes & details (optional)',
+                labelText: 'NOTES & DETAILS (OPTIONAL)',
                 alignLabelWithHint: true,
               ),
             ),
             const SizedBox(height: 24),
 
             // Priority Selector
-            Text('Priority', style: Theme.of(context).textTheme.labelMedium),
+            Text('PRIORITY', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
             Row(
               children: [
                 _PriorityOption(
-                  label: 'High',
+                  label: 'HIGH',
                   color: AppColors.tertiary,
                   isSelected: _priority == 0,
                   onTap: () => setState(() => _priority = 0),
                 ),
                 const SizedBox(width: 8),
                 _PriorityOption(
-                  label: 'Medium',
-                  color: Colors.amber,
+                  label: 'MEDIUM',
+                  color: AppColors.warning,
                   isSelected: _priority == 1,
                   onTap: () => setState(() => _priority = 1),
                 ),
                 const SizedBox(width: 8),
                 _PriorityOption(
-                  label: 'Low',
+                  label: 'LOW',
                   color: AppColors.secondary,
                   isSelected: _priority == 2,
                   onTap: () => setState(() => _priority = 2),
@@ -236,11 +237,11 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.event),
-                    title: const Text('Due Date'),
+                    title: const Text('DUE DATE'),
                     subtitle: Text(
                       _dueDate != null
-                          ? DateFormat('d MMM yyyy').format(_dueDate!)
-                          : 'Not set',
+                          ? DateFormat('d MMM yyyy').format(_dueDate!).toUpperCase()
+                          : 'NOT SET',
                     ),
                     onTap: () async {
                       final picked = await showDatePicker(
@@ -260,10 +261,10 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.access_time),
-                      title: const Text('Due Time'),
+                      title: const Text('DUE TIME'),
                       subtitle: Text(
                         _dueTime != null
-                            ? _dueTime!.format(context)
+                            ? _dueTime!.format(context).toUpperCase()
                             : '12:00 PM',
                       ),
                       onTap: () async {
@@ -285,14 +286,14 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
             DropdownButtonFormField<String>(
               initialValue: _recurrence,
               decoration: const InputDecoration(
-                labelText: 'Repeat',
+                labelText: 'REPEAT',
                 prefixIcon: Icon(Icons.repeat),
               ),
               items: const [
-                DropdownMenuItem(value: 'none', child: Text('Does not repeat')),
-                DropdownMenuItem(value: 'daily', child: Text('Every day')),
-                DropdownMenuItem(value: 'weekly', child: Text('Every week')),
-                DropdownMenuItem(value: 'monthly', child: Text('Every month')),
+                DropdownMenuItem(value: 'none', child: Text('DOES NOT REPEAT')),
+                DropdownMenuItem(value: 'daily', child: Text('EVERY DAY')),
+                DropdownMenuItem(value: 'weekly', child: Text('EVERY WEEK')),
+                DropdownMenuItem(value: 'monthly', child: Text('EVERY MONTH')),
               ],
               onChanged: (val) => setState(() => _recurrence = val!),
             ),
@@ -305,11 +306,15 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
               child: FilledButton(
                 onPressed: _isLoading ? null : _save,
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.markerBlack),
+                      )
                     : const Text(
-                        'Save Task',
+                        'SAVE TASK',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
               ),
             ),
@@ -338,25 +343,27 @@ class _PriorityOption extends StatelessWidget {
     return Expanded(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(2),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? color.withValues(alpha: 0.2)
-                : Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(10),
+                ? color.withValues(alpha: 0.15)
+                : const Color(0xFF1F1F1F),
+            borderRadius: BorderRadius.circular(2),
             border: Border.all(
-              color: isSelected ? color : Colors.white12,
-              width: isSelected ? 1.5 : 1,
+              color: isSelected ? color : const Color(0xFF3A3A3A),
+              width: 1,
             ),
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? color : Colors.white70,
+                color: isSelected ? color : const Color(0xFF777777),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 11,
+                letterSpacing: 0.8,
               ),
             ),
           ),

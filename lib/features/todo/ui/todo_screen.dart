@@ -26,7 +26,7 @@ class TodoScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('To-Do List'),
+        title: const Text('TO-DO LIST'),
       ),
       body: Column(
         children: [
@@ -36,21 +36,21 @@ class TodoScreen extends ConsumerWidget {
             child: Row(
               children: [
                 _FilterChip(
-                  label: 'Pending',
+                  label: 'PENDING',
                   isSelected: activeFilter == false,
                   onSelected: () =>
                       ref.read(todoFilterProvider.notifier).state = false,
                 ),
                 const SizedBox(width: 8),
                 _FilterChip(
-                  label: 'Completed',
+                  label: 'COMPLETED',
                   isSelected: activeFilter == true,
                   onSelected: () =>
                       ref.read(todoFilterProvider.notifier).state = true,
                 ),
                 const SizedBox(width: 8),
                 _FilterChip(
-                  label: 'All',
+                  label: 'ALL',
                   isSelected: activeFilter == null,
                   onSelected: () =>
                       ref.read(todoFilterProvider.notifier).state = null,
@@ -69,16 +69,16 @@ class TodoScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.checklist, size: 64, color: Colors.white24),
+                        const Icon(Icons.checklist, size: 48, color: Color(0xFF3A3A3A)),
                         const SizedBox(height: 16),
                         Text(
                           activeFilter == true
-                              ? 'No completed tasks'
-                              : 'No tasks to do!',
+                              ? 'NO COMPLETED TASKS'
+                              : 'NO TASKS TO DO',
                           style: Theme.of(context)
                               .textTheme
-                              .titleMedium
-                              ?.copyWith(color: Colors.white60),
+                              .titleSmall
+                              ?.copyWith(color: const Color(0xFF888888)),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -86,7 +86,7 @@ class TodoScreen extends ConsumerWidget {
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: Colors.white38),
+                              ?.copyWith(color: const Color(0xFF555555)),
                         ),
                       ],
                     ),
@@ -111,7 +111,7 @@ class TodoScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/todo/new'),
         icon: const Icon(Icons.add),
-        label: const Text('Add Task'),
+        label: const Text('ADD TASK'),
       ),
     );
   }
@@ -134,10 +134,12 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: AppColors.primary,
+      selectedColor: AppColors.paperWhite,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.white60,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+        color: isSelected ? AppColors.markerBlack : const Color(0xFF888888),
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+        fontSize: 10,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -154,7 +156,7 @@ class _TodoItemTile extends ConsumerWidget {
 
     Color priorityColor = switch (todo.priority) {
       0 => AppColors.tertiary,
-      1 => Colors.amber,
+      1 => AppColors.warning,
       _ => AppColors.secondary,
     };
 
@@ -167,7 +169,7 @@ class _TodoItemTile extends ConsumerWidget {
         final cat = payload['categoryHint'] as String? ?? 'Expense';
         if (amountPaise != null) {
           actionLabel =
-              '⚡ Auto-Expense: ${Money.format(amountPaise, showDecimal: false)} in $cat';
+              '// EXPENSE: ${Money.format(amountPaise, showDecimal: false)} in $cat';
         }
       } catch (_) {}
     }
@@ -190,7 +192,7 @@ class _TodoItemTile extends ConsumerWidget {
         }
       },
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -218,25 +220,25 @@ class _TodoItemTile extends ConsumerWidget {
                             todo.title,
                             style: Theme.of(context)
                                 .textTheme
-                                .bodyLarge
+                                .bodyMedium
                                 ?.copyWith(
                                   decoration: todo.isDone
                                       ? TextDecoration.lineThrough
                                       : null,
                                   color: todo.isDone
-                                      ? Colors.white38
-                                      : Colors.white,
+                                      ? const Color(0xFF555555)
+                                      : AppColors.paperWhite,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
                         ),
-                        // Priority dot
+                        // Priority square dot
                         Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
                             color: priorityColor,
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(1),
                           ),
                         ),
                       ],
@@ -248,7 +250,7 @@ class _TodoItemTile extends ConsumerWidget {
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall
-                            ?.copyWith(color: Colors.white54),
+                            ?.copyWith(color: const Color(0xFF777777)),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -267,19 +269,19 @@ class _TodoItemTile extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.06),
-                              borderRadius: BorderRadius.circular(4),
+                              color: const Color(0xFF222222),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(Icons.repeat,
-                                    size: 10, color: Colors.white54),
+                                    size: 10, color: Color(0xFF777777)),
                                 const SizedBox(width: 4),
                                 Text(
-                                  todo.recurrence,
+                                  todo.recurrence.toUpperCase(),
                                   style: const TextStyle(
-                                      fontSize: 10, color: Colors.white54),
+                                      fontSize: 9, color: Color(0xFF777777), letterSpacing: 0.5),
                                 ),
                               ],
                             ),
@@ -292,19 +294,20 @@ class _TodoItemTile extends ConsumerWidget {
                               color: (todo.actionStatus == 'executed'
                                       ? AppColors.secondary
                                       : AppColors.primary)
-                                  .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(4),
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                             child: Text(
                               todo.actionStatus == 'executed'
-                                  ? '✓ Expense Logged'
+                                  ? '// LOGGED'
                                   : actionLabel,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: FontWeight.w600,
                                 color: todo.actionStatus == 'executed'
                                     ? AppColors.secondary
                                     : AppColors.primary,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
@@ -339,14 +342,14 @@ class _DueBadge extends StatelessWidget {
     Color badgeColor = isOverdue
         ? AppColors.tertiary
         : isToday
-            ? Colors.amber
-            : Colors.white54;
+            ? AppColors.warning
+            : const Color(0xFF777777);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -355,12 +358,13 @@ class _DueBadge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             isToday
-                ? 'Today, ${DateFormat('h:mm a').format(due)}'
-                : DateFormat('d MMM, h:mm a').format(due),
+                ? 'TODAY, ${DateFormat('h:mm a').format(due).toUpperCase()}'
+                : DateFormat('d MMM, h:mm a').format(due).toUpperCase(),
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               fontWeight: FontWeight.w500,
               color: badgeColor,
+              letterSpacing: 0.5,
             ),
           ),
         ],

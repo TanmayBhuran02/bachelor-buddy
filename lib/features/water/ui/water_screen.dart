@@ -10,11 +10,6 @@ import 'package:bachelor_buddy/core/theme/app_theme.dart';
 import 'package:bachelor_buddy/features/water/domain/water_providers.dart';
 import 'package:bachelor_buddy/features/water/data/water_repository.dart';
 
-// ─── Gradient / Glow Colors ────────────────────────────────────────────────
-const _kCyanStart = Color(0xFF00E5FF);
-const _kTealEnd = Color(0xFF00F5D4);
-const _kTrackColor = Color(0xFF222332);
-
 class WaterScreen extends ConsumerWidget {
   const WaterScreen({super.key});
 
@@ -24,7 +19,7 @@ class WaterScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Water Tracker'),
+        title: const Text('WATER TRACKER'),
         actions: [
           IconButton(
             icon: const Icon(Icons.tune),
@@ -46,7 +41,7 @@ class WaterScreen extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: AppColors.cardDark,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
       ),
       builder: (ctx) => const _WaterSettingsSheet(),
     );
@@ -70,7 +65,7 @@ class _WaterBody extends ConsumerWidget {
       children: [
         const Spacer(flex: 2),
 
-        // ── Progress Ring ──────────────────────────────────────────────
+        // ── Raw Progress Ring ──────────────────────────────────────────
         SizedBox(
           width: 220,
           height: 220,
@@ -80,24 +75,24 @@ class _WaterBody extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Water drop icon in tinted circle
+                  // Water drop icon in square container
                   Container(
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _kTealEnd.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(2),
+                      color: const Color(0xFF1F1F1F),
                       border: Border.all(
-                        color: _kTealEnd.withValues(alpha: 0.3),
+                        color: const Color(0xFF3A3A3A),
                       ),
                     ),
                     child: const Icon(
                       Icons.water_drop,
-                      color: _kTealEnd,
-                      size: 20,
+                      color: AppColors.secondary,
+                      size: 18,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
                   // Large ml amount
                   RichText(
@@ -109,18 +104,19 @@ class _WaterBody extends ConsumerWidget {
                               .textTheme
                               .headlineLarge
                               ?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.paperWhite,
                               ),
                         ),
                         TextSpan(
-                          text: ' ml',
+                          text: ' ML',
                           style: Theme.of(context)
                               .textTheme
-                              .bodySmall
+                              .labelSmall
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: _kTealEnd,
+                                color: AppColors.secondary,
+                                letterSpacing: 1,
                               ),
                         ),
                       ],
@@ -129,30 +125,32 @@ class _WaterBody extends ConsumerWidget {
 
                   // Goal text
                   Text(
-                    '/ ${_formatMl(status.goalMl)} ml',
+                    '/ ${_formatMl(status.goalMl)} ML',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white38,
+                          color: const Color(0xFF777777),
+                          letterSpacing: 0.5,
                         ),
                   ),
                   const SizedBox(height: 8),
 
-                  // Percentage pill badge
+                  // Percentage pill badge (square corners)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 3),
+                        horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: _kTealEnd.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(2),
+                      color: const Color(0xFF1F1F1F),
                       border: Border.all(
-                        color: _kTealEnd.withValues(alpha: 0.25),
+                        color: const Color(0xFF3A3A3A),
                       ),
                     ),
                     child: Text(
-                      '$percent% of daily goal',
+                      '$percent% OF GOAL',
                       style: const TextStyle(
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: _kTealEnd,
+                        color: AppColors.secondary,
+                        letterSpacing: 0.8,
                       ),
                     ),
                   ),
@@ -162,13 +160,14 @@ class _WaterBody extends ConsumerWidget {
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
         // Remaining / glasses info
         Text(
-          '${status.glassesDrank} glasses \u2022 ${_formatMl(remaining)} ml left',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white54,
+          '${status.glassesDrank} GLASSES • ${_formatMl(remaining)} ML LEFT',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: const Color(0xFF777777),
+                letterSpacing: 0.8,
               ),
         ),
 
@@ -176,47 +175,21 @@ class _WaterBody extends ConsumerWidget {
 
         // ── +1 Glass Button ────────────────────────────────────────────
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: SizedBox(
             width: double.infinity,
-            height: 56,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF00D2B4), _kTealEnd, Color(0xFF06B6D4)],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: _kTealEnd.withValues(alpha: 0.30),
-                    blurRadius: 24,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () async {
-                    await repo.addWater(status.glassMl);
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.local_drink,
-                          color: Color(0xFF0A1A1A), size: 24),
-                      const SizedBox(width: 10),
-                      Text(
-                        '+1 Glass (${status.glassMl}ml)',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF0A1A1A),
-                        ),
-                      ),
-                    ],
-                  ),
+            height: 52,
+            child: FilledButton.icon(
+              onPressed: () async {
+                await repo.addWater(status.glassMl);
+              },
+              icon: const Icon(Icons.local_drink, size: 20),
+              label: Text(
+                '+1 GLASS (${status.glassMl}ML)',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
                 ),
               ),
             ),
@@ -230,7 +203,7 @@ class _WaterBody extends ConsumerWidget {
 
   String _formatMl(int ml) {
     if (ml >= 1000) {
-      return '${(ml / 1000).toStringAsFixed(ml % 1000 == 0 ? 0 : 1)}k';
+      return '${(ml / 1000).toStringAsFixed(ml % 1000 == 0 ? 0 : 1)}K';
     }
     return '$ml';
   }
@@ -247,54 +220,28 @@ class _HydrationRingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.shortestSide / 2) - 8;
-    const strokeWidth = 12.0;
+    const strokeWidth = 8.0;
     const startAngle = -math.pi / 2; // 12 o'clock
 
-    // Track ring
+    // Track ring (raw dark grey)
     final trackPaint = Paint()
-      ..color = _kTrackColor
+      ..color = const Color(0xFF2A2A2A)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.square;
 
     canvas.drawCircle(center, radius, trackPaint);
 
-    // Progress arc with gradient
+    // Progress arc (solid raw teal, no glow, square cap)
     if (progress > 0) {
       final sweepAngle = 2 * math.pi * progress.clamp(0.0, 1.0);
       final rect = Rect.fromCircle(center: center, radius: radius);
 
-      // Glow layer
-      final glowPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth + 6
-        ..strokeCap = StrokeCap.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
-        ..shader = SweepGradient(
-          startAngle: startAngle,
-          endAngle: startAngle + sweepAngle,
-          colors: [
-            _kCyanStart.withValues(alpha: 0.4),
-            _kTealEnd.withValues(alpha: 0.4),
-          ],
-          stops: const [0.0, 1.0],
-          transform: GradientRotation(startAngle),
-        ).createShader(rect);
-
-      canvas.drawArc(rect, startAngle, sweepAngle, false, glowPaint);
-
-      // Main arc
       final arcPaint = Paint()
+        ..color = AppColors.secondary
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round
-        ..shader = SweepGradient(
-          startAngle: startAngle,
-          endAngle: startAngle + sweepAngle,
-          colors: const [_kCyanStart, _kTealEnd],
-          stops: const [0.0, 1.0],
-          transform: GradientRotation(startAngle),
-        ).createShader(rect);
+        ..strokeCap = StrokeCap.square;
 
       canvas.drawArc(rect, startAngle, sweepAngle, false, arcPaint);
     }
@@ -303,7 +250,6 @@ class _HydrationRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(_HydrationRingPainter old) => old.progress != progress;
 }
-
 
 // ─── Settings Bottom Sheet ─────────────────────────────────────────────────
 
@@ -357,8 +303,8 @@ class _WaterSettingsSheetState extends ConsumerState<_WaterSettingsSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Water Goal & Reminders',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text('WATER GOAL & REMINDERS',
+                      style: Theme.of(context).textTheme.titleMedium),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
@@ -371,7 +317,7 @@ class _WaterSettingsSheetState extends ConsumerState<_WaterSettingsSheet> {
                 controller: _goalController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Daily Goal (ml)',
+                  labelText: 'DAILY GOAL (ML)',
                   suffixText: 'ml',
                 ),
               ),
@@ -381,7 +327,7 @@ class _WaterSettingsSheetState extends ConsumerState<_WaterSettingsSheet> {
                 controller: _glassController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Glass Size (ml)',
+                  labelText: 'GLASS SIZE (ML)',
                   suffixText: 'ml',
                 ),
               ),
@@ -389,13 +335,13 @@ class _WaterSettingsSheetState extends ConsumerState<_WaterSettingsSheet> {
 
               DropdownButtonFormField<int>(
                 initialValue: _interval,
-                decoration: const InputDecoration(labelText: 'Reminder Interval'),
+                decoration: const InputDecoration(labelText: 'REMINDER INTERVAL'),
                 items: const [
-                  DropdownMenuItem(value: 30, child: Text('Every 30 mins')),
-                  DropdownMenuItem(value: 45, child: Text('Every 45 mins')),
-                  DropdownMenuItem(value: 60, child: Text('Every 1 hour')),
-                  DropdownMenuItem(value: 90, child: Text('Every 1.5 hours')),
-                  DropdownMenuItem(value: 120, child: Text('Every 2 hours')),
+                  DropdownMenuItem(value: 30, child: Text('EVERY 30 MINS')),
+                  DropdownMenuItem(value: 45, child: Text('EVERY 45 MINS')),
+                  DropdownMenuItem(value: 60, child: Text('EVERY 1 HOUR')),
+                  DropdownMenuItem(value: 90, child: Text('EVERY 1.5 HOURS')),
+                  DropdownMenuItem(value: 120, child: Text('EVERY 2 HOURS')),
                 ],
                 onChanged: (val) => setState(() => _interval = val!),
               ),
@@ -403,7 +349,7 @@ class _WaterSettingsSheetState extends ConsumerState<_WaterSettingsSheet> {
 
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Enable Reminders'),
+                title: const Text('ENABLE REMINDERS'),
                 subtitle: const Text('Notifications during active daytime'),
                 value: _enabled,
                 onChanged: (val) => setState(() => _enabled = val),
@@ -432,7 +378,7 @@ class _WaterSettingsSheetState extends ConsumerState<_WaterSettingsSheet> {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text('Save Settings'),
+                  child: const Text('SAVE SETTINGS'),
                 ),
               ),
             ],

@@ -29,7 +29,7 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tiffin Tracker'),
+        title: const Text('TIFFIN TRACKER'),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month),
@@ -81,13 +81,13 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Meals for ${_formatDateHeader(selectedDate)}',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    'MEALS FOR ${_formatDateHeader(selectedDate)}',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(letterSpacing: 0.8),
                   ),
                   TextButton.icon(
                     onPressed: () => _showAddPlanModal(context),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('New Plan'),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text('NEW PLAN'),
                   ),
                 ],
               ),
@@ -103,27 +103,27 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
                     child: Center(
                       child: Column(
                         children: [
-                          Icon(Icons.lunch_dining,
-                              size: 56, color: Colors.white24),
+                          const Icon(Icons.lunch_dining,
+                              size: 48, color: Color(0xFF3A3A3A)),
                           const SizedBox(height: 12),
                           Text(
-                            'No active tiffin plans yet',
+                            'NO ACTIVE TIFFIN PLANS',
                             style: Theme.of(context)
                                 .textTheme
-                                .titleMedium
-                                ?.copyWith(color: Colors.white70),
+                                .titleSmall
+                                ?.copyWith(color: const Color(0xFF888888)),
                           ),
                           const SizedBox(height: 6),
                           const Text(
-                            'Set up a daily plan from your tiffin vendor to track meal deliveries and auto-log expenses.',
+                            'Set up a daily plan from your tiffin vendor to track meal deliveries.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white38),
+                            style: TextStyle(color: Color(0xFF555555), fontSize: 11),
                           ),
                           const SizedBox(height: 16),
                           FilledButton.icon(
                             onPressed: () => _showAddPlanModal(context),
                             icon: const Icon(Icons.add),
-                            label: const Text('Create Tiffin Plan'),
+                            label: const Text('CREATE TIFFIN PLAN'),
                           ),
                         ],
                       ),
@@ -155,7 +155,7 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddPlanModal(context),
         icon: const Icon(Icons.add),
-        label: const Text('Add Plan'),
+        label: const Text('ADD PLAN'),
       ),
     );
   }
@@ -165,10 +165,10 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
     final today = DateTime(now.year, now.month, now.day);
     final itemDate = DateTime(date.year, date.month, date.day);
 
-    if (itemDate == today) return 'Today';
-    if (itemDate == today.subtract(const Duration(days: 1))) return 'Yesterday';
-    if (itemDate == today.add(const Duration(days: 1))) return 'Tomorrow';
-    return DateFormat('d MMM').format(date);
+    if (itemDate == today) return 'TODAY';
+    if (itemDate == today.subtract(const Duration(days: 1))) return 'YESTERDAY';
+    if (itemDate == today.add(const Duration(days: 1))) return 'TOMORROW';
+    return DateFormat('d MMM').format(date).toUpperCase();
   }
 
   void _showAddPlanModal(BuildContext context) {
@@ -177,7 +177,7 @@ class _TiffinScreenState extends ConsumerState<TiffinScreen> {
       isScrollControlled: true,
       backgroundColor: AppColors.cardDark,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
       ),
       builder: (ctx) => const _AddTiffinPlanSheet(),
     );
@@ -207,7 +207,7 @@ class _TiffinMonthlyCard extends StatelessWidget {
                       'MONTHLY TIFFIN BILL',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             letterSpacing: 1.2,
-                            color: Colors.white54,
+                            color: const Color(0xFF777777),
                           ),
                     ),
                     const SizedBox(height: 6),
@@ -226,11 +226,12 @@ class _TiffinMonthlyCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFF1F1F1F),
+                    borderRadius: BorderRadius.circular(2),
+                    border: Border.all(color: const Color(0xFF3A3A3A)),
                   ),
                   child: const Icon(Icons.receipt_long,
-                      color: AppColors.primary, size: 28),
+                      color: AppColors.kraftBrown, size: 24),
                 ),
               ],
             ),
@@ -239,19 +240,19 @@ class _TiffinMonthlyCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _StatusMetric(
-                  label: 'Received',
+                  label: 'RECEIVED',
                   value: '${summary.totalReceived}',
                   color: AppColors.secondary,
                 ),
                 _StatusMetric(
-                  label: 'Skipped',
+                  label: 'SKIPPED',
                   value: '${summary.totalSkipped}',
                   color: AppColors.tertiary,
                 ),
                 _StatusMetric(
-                  label: 'Pending',
+                  label: 'PENDING',
                   value: '${summary.totalPending}',
-                  color: Colors.amber,
+                  color: AppColors.warning,
                 ),
               ],
             ),
@@ -290,7 +291,7 @@ class _StatusMetric extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .labelSmall
-              ?.copyWith(color: Colors.white54),
+              ?.copyWith(color: const Color(0xFF777777), letterSpacing: 0.8),
         ),
       ],
     );
@@ -327,31 +328,32 @@ class _DateStrip extends StatelessWidget {
               day.day == selectedDate.day;
 
           return InkWell(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(2),
             onTap: () => onSelectDate(day),
             child: Container(
               width: 52,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primary
-                    : Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
+                    ? AppColors.paperWhite
+                    : const Color(0xFF1F1F1F),
+                borderRadius: BorderRadius.circular(2),
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.primary
-                      : Colors.white.withValues(alpha: 0.1),
+                      ? AppColors.paperWhite
+                      : const Color(0xFF3A3A3A),
                 ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    DateFormat('E').format(day),
+                    DateFormat('E').format(day).toUpperCase(),
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.w400,
-                      color: isSelected ? Colors.white : Colors.white60,
+                      color: isSelected ? AppColors.markerBlack : const Color(0xFF777777),
+                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -360,7 +362,7 @@ class _DateStrip extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : Colors.white,
+                      color: isSelected ? AppColors.markerBlack : AppColors.paperWhite,
                     ),
                   ),
                 ],
@@ -396,17 +398,17 @@ class _TiffinMealCard extends ConsumerWidget {
     switch (status) {
       case 'received':
         statusColor = AppColors.secondary;
-        statusText = 'Received (Auto-logged ₹${plan.pricePerTiffinPaise ~/ 100})';
+        statusText = 'RECEIVED (AUTO-LOGGED ₹${plan.pricePerTiffinPaise ~/ 100})';
         statusIcon = Icons.check_circle;
         break;
       case 'skipped':
         statusColor = AppColors.tertiary;
-        statusText = 'Skipped (No Charge)';
+        statusText = 'SKIPPED (NO CHARGE)';
         statusIcon = Icons.cancel;
         break;
       default:
-        statusColor = Colors.amber;
-        statusText = 'Pending confirmation';
+        statusColor = AppColors.warning;
+        statusText = 'PENDING CONFIRMATION';
         statusIcon = Icons.hourglass_top;
     }
 
@@ -422,8 +424,9 @@ class _TiffinMealCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
+                    color: const Color(0xFF1F1F1F),
+                    borderRadius: BorderRadius.circular(2),
+                    border: Border.all(color: const Color(0xFF3A3A3A)),
                   ),
                   child: Icon(
                     plan.mealType == 'dinner'
@@ -431,7 +434,8 @@ class _TiffinMealCard extends ConsumerWidget {
                         : plan.mealType == 'lunch'
                             ? Icons.lunch_dining
                             : Icons.breakfast_dining,
-                    color: AppColors.primary,
+                    color: AppColors.kraftBrown,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -440,18 +444,18 @@ class _TiffinMealCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${plan.mealType.toUpperCase()} • ${plan.providerName}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        '${plan.mealType.toUpperCase()} // ${plan.providerName.toUpperCase()}',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Daily @ ${plan.reminderTime} • ${Money.format(plan.pricePerTiffinPaise, showDecimal: false)}/meal',
+                        'DAILY @ ${plan.reminderTime} • ${Money.format(plan.pricePerTiffinPaise, showDecimal: false)}/MEAL',
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall
-                            ?.copyWith(color: Colors.white60),
+                            ?.copyWith(color: const Color(0xFF777777)),
                       ),
                     ],
                   ),
@@ -462,10 +466,10 @@ class _TiffinMealCard extends ConsumerWidget {
 
             // Status chip
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                color: statusColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(2),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -475,9 +479,10 @@ class _TiffinMealCard extends ConsumerWidget {
                   Text(
                     statusText,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: statusColor,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ],
@@ -491,28 +496,21 @@ class _TiffinMealCard extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white70,
-                        side: const BorderSide(color: Colors.white24),
-                      ),
                       onPressed: () async {
                         await repo.markSkipped(planId: plan.id, date: dateStr);
                       },
                       icon: const Icon(Icons.close, size: 16),
-                      label: const Text('Skip'),
+                      label: const Text('SKIP'),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                      ),
                       onPressed: () async {
                         await repo.markReceived(planId: plan.id, date: dateStr);
                       },
                       icon: const Icon(Icons.check, size: 16),
-                      label: const Text('Received'),
+                      label: const Text('RECEIVED'),
                     ),
                   ),
                 ],
@@ -562,8 +560,8 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('New Tiffin Plan',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text('NEW TIFFIN PLAN',
+                  style: Theme.of(context).textTheme.titleMedium),
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
@@ -576,7 +574,7 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
             controller: _providerController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
-              labelText: 'Vendor / Provider Name',
+              labelText: 'VENDOR / PROVIDER NAME',
               hintText: 'e.g. Sai Tiffin Service',
             ),
           ),
@@ -587,11 +585,11 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: _mealType,
-                  decoration: const InputDecoration(labelText: 'Meal Type'),
+                  decoration: const InputDecoration(labelText: 'MEAL TYPE'),
                   items: const [
-                    DropdownMenuItem(value: 'breakfast', child: Text('Breakfast')),
-                    DropdownMenuItem(value: 'lunch', child: Text('Lunch')),
-                    DropdownMenuItem(value: 'dinner', child: Text('Dinner')),
+                    DropdownMenuItem(value: 'breakfast', child: Text('BREAKFAST')),
+                    DropdownMenuItem(value: 'lunch', child: Text('LUNCH')),
+                    DropdownMenuItem(value: 'dinner', child: Text('DINNER')),
                   ],
                   onChanged: (val) => setState(() => _mealType = val!),
                 ),
@@ -602,7 +600,7 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
                   controller: _priceController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Price per meal (₹)',
+                    labelText: 'PRICE / MEAL (₹)',
                     prefixText: '₹ ',
                   ),
                 ),
@@ -614,7 +612,7 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.access_time),
-            title: const Text('Daily Reminder Time'),
+            title: const Text('DAILY REMINDER TIME'),
             subtitle: Text(_reminderTime.format(context)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
@@ -663,7 +661,7 @@ class _AddTiffinPlanSheetState extends ConsumerState<_AddTiffinPlanSheet> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Create Plan'),
+              child: const Text('CREATE PLAN'),
             ),
           ),
         ],

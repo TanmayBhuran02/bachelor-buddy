@@ -77,7 +77,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                   ref.read(expenseSearchQueryProvider.notifier).state = query;
                 },
               )
-            : const Text('Expenses'),
+            : const Text('EXPENSES'),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -125,7 +125,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
               child: Row(
                 children: [
                   Chip(
-                    label: const Text('Filtered Category'),
+                    label: const Text('FILTERED'),
                     deleteIcon: const Icon(Icons.close, size: 16),
                     onDeleted: () {
                       ref.read(selectedCategoryFilterProvider.notifier).state =
@@ -147,14 +147,14 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.receipt_long,
-                            size: 64, color: Colors.white24),
+                            size: 48, color: const Color(0xFF3A3A3A)),
                         const SizedBox(height: 16),
                         Text(
                           'No transactions for this month',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
-                              ?.copyWith(color: Colors.white60),
+                              ?.copyWith(color: const Color(0xFF888888)),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -162,7 +162,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: Colors.white38),
+                              ?.copyWith(color: const Color(0xFF555555)),
                         ),
                       ],
                     ),
@@ -208,7 +208,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                             background: Container(
                               alignment: Alignment.centerRight,
                               padding: const EdgeInsets.only(right: 20),
-                              color: AppColors.tertiary.withValues(alpha: 0.2),
+                              color: AppColors.tertiary.withValues(alpha: 0.15),
                               child: const Icon(Icons.delete_outline,
                                   color: AppColors.tertiary),
                             ),
@@ -221,7 +221,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   SnackBar(
                                     content: Text('${tx.note.isEmpty ? cat.name : tx.note} deleted'),
                                     action: SnackBarAction(
-                                      label: 'Undo',
+                                      label: 'UNDO',
                                       onPressed: () async {
                                         await repo.addTransaction(
                                           amountPaise: tx.amountPaise,
@@ -246,8 +246,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   color: _colorForCategory(cat.colorHex)
-                                      .withValues(alpha: 0.15),
-                                  shape: BoxShape.circle,
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(2),
                                 ),
                                 child: Icon(
                                   _iconForCategory(cat.iconKey),
@@ -273,17 +273,18 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                           horizontal: 6, vertical: 1),
                                       decoration: BoxDecoration(
                                         color: AppColors.primary
-                                            .withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(4),
+                                            .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(2),
                                       ),
                                       child: Text(
-                                        '⚡ Auto',
+                                        '// AUTO',
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelSmall
                                             ?.copyWith(
                                               color: AppColors.primary,
-                                              fontSize: 10,
+                                              fontSize: 9,
+                                              letterSpacing: 0.5,
                                             ),
                                       ),
                                     ),
@@ -295,17 +296,18 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                           horizontal: 6, vertical: 1),
                                       decoration: BoxDecoration(
                                         color: AppColors.secondary
-                                            .withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(4),
+                                            .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(2),
                                       ),
                                       child: Text(
-                                        '👥 Shared',
+                                        ':: SHARED',
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelSmall
                                             ?.copyWith(
                                               color: AppColors.secondary,
-                                              fontSize: 10,
+                                              fontSize: 9,
+                                              letterSpacing: 0.5,
                                             ),
                                       ),
                                     ),
@@ -320,17 +322,18 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.06),
+                                        color: const Color(0xFF222222),
                                         borderRadius:
-                                            BorderRadius.circular(4),
+                                            BorderRadius.circular(2),
                                       ),
                                       child: Text(
-                                        cat.name,
+                                        cat.name.toUpperCase(),
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelSmall
-                                            ?.copyWith(color: Colors.white54),
+                                            ?.copyWith(
+                                                color: const Color(0xFF777777),
+                                                letterSpacing: 0.5),
                                       ),
                                     ),
                                   ],
@@ -365,7 +368,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/expenses/new'),
         icon: const Icon(Icons.add),
-        label: const Text('Add Expense'),
+        label: const Text('ADD EXPENSE'),
       ),
     );
   }
@@ -376,11 +379,11 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     final itemDate = DateTime(date.year, date.month, date.day);
 
     if (itemDate == today) {
-      return 'Today, ${DateFormat('d MMM').format(date)}';
+      return 'TODAY, ${DateFormat('d MMM').format(date).toUpperCase()}';
     } else if (itemDate == today.subtract(const Duration(days: 1))) {
-      return 'Yesterday, ${DateFormat('d MMM').format(date)}';
+      return 'YESTERDAY, ${DateFormat('d MMM').format(date).toUpperCase()}';
     } else {
-      return DateFormat('EEEE, d MMM').format(date);
+      return DateFormat('EEEE, d MMM').format(date).toUpperCase();
     }
   }
 
@@ -399,7 +402,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Filter by Category',
+                    Text('FILTER BY CATEGORY',
                         style: Theme.of(context).textTheme.titleMedium),
                     TextButton(
                       onPressed: () {
@@ -408,7 +411,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                             .state = null;
                         Navigator.pop(context);
                       },
-                      child: const Text('Reset'),
+                      child: const Text('RESET'),
                     ),
                   ],
                 ),
@@ -422,7 +425,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                           ref.watch(selectedCategoryFilterProvider) == c.id;
                       return ChoiceChip(
                         selected: isSelected,
-                        label: Text(c.name),
+                        label: Text(c.name.toUpperCase()),
                         onSelected: (selected) {
                           ref
                               .read(selectedCategoryFilterProvider.notifier)
@@ -483,16 +486,20 @@ class _MonthSelector extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: ChoiceChip(
                       label: Text(
-                        DateFormat('MMM yyyy').format(m),
+                        DateFormat('MMM yyyy').format(m).toUpperCase(),
                         overflow: TextOverflow.ellipsis,
                       ),
                       selected: isActive,
                       onSelected: (_) => onMonthChanged(mStr),
-                      selectedColor: AppColors.primary,
+                      selectedColor: AppColors.paperWhite,
                       labelStyle: TextStyle(
-                        color: isActive ? Colors.white : Colors.white60,
+                        color: isActive
+                            ? AppColors.markerBlack
+                            : const Color(0xFF888888),
                         fontWeight:
-                            isActive ? FontWeight.w600 : FontWeight.w400,
+                            isActive ? FontWeight.w700 : FontWeight.w400,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -526,23 +533,23 @@ class _MonthlySummary extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _SummaryItem('Income',
+            _SummaryItem('INCOME',
                 Money.format(totals.totalIncomePaise, showDecimal: false),
                 AppColors.secondary),
             Container(
                 width: 1,
                 height: 32,
-                color: Colors.white.withValues(alpha: 0.1)),
-            _SummaryItem('Expenses',
+                color: const Color(0xFF3A3A3A)),
+            _SummaryItem('EXPENSES',
                 Money.format(totals.totalExpensePaise, showDecimal: false),
                 AppColors.tertiary),
             Container(
                 width: 1,
                 height: 32,
-                color: Colors.white.withValues(alpha: 0.1)),
-            _SummaryItem('Balance',
+                color: const Color(0xFF3A3A3A)),
+            _SummaryItem('BALANCE',
                 Money.format(totals.balancePaise, showDecimal: false),
-                Colors.white),
+                AppColors.paperWhite),
           ],
         ),
       ),
@@ -565,7 +572,7 @@ class _SummaryItem extends StatelessWidget {
             style: Theme.of(context)
                 .textTheme
                 .labelSmall
-                ?.copyWith(color: Colors.white60)),
+                ?.copyWith(color: const Color(0xFF888888), letterSpacing: 1)),
         const SizedBox(height: 4),
         Text(value,
             style: Theme.of(context)
@@ -594,12 +601,13 @@ class _DateHeader extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .labelMedium
-                  ?.copyWith(color: Colors.white60)),
+                  ?.copyWith(
+                      color: const Color(0xFF888888), letterSpacing: 0.8)),
           Text(Money.format(total, showDecimal: false),
               style: Theme.of(context)
                   .textTheme
                   .labelMedium
-                  ?.copyWith(color: Colors.white38)),
+                  ?.copyWith(color: const Color(0xFF555555))),
         ],
       ),
     );
