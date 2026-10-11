@@ -22,19 +22,27 @@ class TransactionNotificationService : NotificationListenerService() {
             isEnabled = enabled
             activePackages = packages
             isConfigLoaded = true
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-                .putBoolean(KEY_ENABLED, enabled)
-                .putStringSet(KEY_PACKAGES, packages)
-                .apply()
-            Log.d(TAG, "Config updated: enabled=$enabled, activeAppsCount=${packages.size}")
+            try {
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+                    .putBoolean(KEY_ENABLED, enabled)
+                    .putStringSet(KEY_PACKAGES, packages)
+                    .apply()
+                Log.d(TAG, "Config updated: enabled=$enabled, activeAppsCount=${packages.size}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating config: $e")
+            }
         }
 
         fun loadConfiguration(context: Context) {
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            isEnabled = prefs.getBoolean(KEY_ENABLED, false)
-            activePackages = prefs.getStringSet(KEY_PACKAGES, emptySet()) ?: emptySet()
-            isConfigLoaded = true
-            Log.d(TAG, "Config loaded: enabled=$isEnabled, activeAppsCount=${activePackages.size}")
+            try {
+                val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                isEnabled = prefs.getBoolean(KEY_ENABLED, false)
+                activePackages = prefs.getStringSet(KEY_PACKAGES, emptySet()) ?: emptySet()
+                isConfigLoaded = true
+                Log.d(TAG, "Config loaded: enabled=$isEnabled, activeAppsCount=${activePackages.size}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading config: $e")
+            }
         }
     }
 
