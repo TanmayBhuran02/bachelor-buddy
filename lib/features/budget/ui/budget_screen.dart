@@ -119,8 +119,11 @@ class BudgetScreen extends ConsumerWidget {
     );
   }
 
-  void _showSetOverallBudgetModal(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController();
+  void _showSetOverallBudgetModal(BuildContext context, WidgetRef ref, [int? currentLimitPaise]) {
+    final defaultPaise = (currentLimitPaise != null && currentLimitPaise > 0)
+        ? currentLimitPaise
+        : 25000 * 100;
+    final controller = TextEditingController(text: '${defaultPaise ~/ 100}');
     final month = ref.read(selectedMonthProvider);
 
     showDialog(
@@ -162,7 +165,7 @@ class BudgetScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.cardDark,
+      backgroundColor: AppColors.card(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
       ),
@@ -212,7 +215,7 @@ class _OverallBudgetCard extends StatelessWidget {
                       'TOTAL MONTHLY BUDGET',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             letterSpacing: 1.2,
-                            color: const Color(0xFF777777),
+                            color: AppColors.textMuted(context),
                           ),
                     ),
                     const SizedBox(height: 6),
@@ -222,7 +225,7 @@ class _OverallBudgetCard extends StatelessWidget {
                           : 'NOT SET',
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: AppColors.paperWhite,
+                            color: AppColors.text(context),
                           ),
                     ),
                   ],
@@ -239,7 +242,7 @@ class _OverallBudgetCard extends StatelessWidget {
             LinearProgressIndicator(
               value: hasLimit ? overview.percentage.clamp(0.0, 1.0) : 0.0,
               minHeight: 8,
-              backgroundColor: const Color(0xFF2A2A2A),
+              backgroundColor: AppColors.track(context),
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
             ),
             const SizedBox(height: 16),
@@ -253,7 +256,7 @@ class _OverallBudgetCard extends StatelessWidget {
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
-                        ?.copyWith(color: const Color(0xFF888888)),
+                        ?.copyWith(color: AppColors.textMuted(context)),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -282,9 +285,9 @@ class _OverallBudgetCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1F1F1F),
+                color: AppColors.surface(context),
                 borderRadius: BorderRadius.circular(2),
-                border: Border.all(color: const Color(0xFF3A3A3A)),
+                border: Border.all(color: AppColors.border(context)),
               ),
               child: Row(
                 children: [
@@ -295,19 +298,23 @@ class _OverallBudgetCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'SAFE-TO-SPEND / DAY',
-                          style: TextStyle(fontSize: 10, color: Color(0xFF777777), letterSpacing: 0.8),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.textMuted(context),
+                            letterSpacing: 0.8,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           hasLimit
                               ? '${Money.format(overview.safeToSpendPerDayPaise, showDecimal: false)} / DAY'
                               : 'Set a monthly budget to calculate',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.paperWhite,
+                            color: AppColors.text(context),
                           ),
                         ),
                       ],
@@ -315,7 +322,11 @@ class _OverallBudgetCard extends StatelessWidget {
                   ),
                   Text(
                     '${overview.remainingDays} DAYS LEFT',
-                    style: const TextStyle(fontSize: 10, color: Color(0xFF555555), letterSpacing: 0.5),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppColors.textSubtle(context),
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ],
               ),
@@ -407,7 +418,11 @@ class _SpendingPieChartCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       '${item.category.name.toUpperCase()}: ${Money.format(item.spentPaise, showDecimal: false)}',
-                      style: const TextStyle(fontSize: 10, color: Color(0xFF888888), letterSpacing: 0.5),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textMuted(context),
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ],
                 );
@@ -461,7 +476,7 @@ class _CategoryBudgetList extends ConsumerWidget {
                   LinearProgressIndicator(
                     value: item.percentage.clamp(0.0, 1.0),
                     minHeight: 6,
-                    backgroundColor: const Color(0xFF2A2A2A),
+                    backgroundColor: AppColors.track(context),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       item.percentage > 1.0
                           ? AppColors.tertiary
@@ -474,20 +489,29 @@ class _CategoryBudgetList extends ConsumerWidget {
                     children: [
                       Text(
                         'LIMIT: ${Money.format(item.limitPaise!, showDecimal: false)} ($pct%)',
-                        style: const TextStyle(
-                            fontSize: 10, color: Color(0xFF777777), letterSpacing: 0.5),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.textMuted(context),
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                      const Text(
+                      Text(
                         'TAP TO EDIT →',
                         style: TextStyle(
-                            fontSize: 9, color: Color(0xFF888888), letterSpacing: 0.8),
+                          fontSize: 9,
+                          color: AppColors.textSubtle(context),
+                          letterSpacing: 0.8,
+                        ),
                       ),
                     ],
                   ),
                 ] else ...[
-                  const Text(
+                  Text(
                     'No budget limit set • Tap to set limit',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF555555)),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMuted(context),
+                    ),
                   ),
                 ],
               ],
@@ -549,11 +573,14 @@ class _RecurringExpensesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (items.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Text(
           'No recurring bills added. Add rent, subscriptions, or WiFi bills to auto-generate them every month.',
-          style: TextStyle(fontSize: 11, color: Color(0xFF555555)),
+          style: TextStyle(
+            fontSize: 11,
+            color: AppColors.textMuted(context),
+          ),
         ),
       );
     }
@@ -587,9 +614,9 @@ class _RecurringExpensesList extends ConsumerWidget {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1F1F1F),
+                  color: AppColors.surface(context),
                   borderRadius: BorderRadius.circular(2),
-                  border: Border.all(color: const Color(0xFF3A3A3A)),
+                  border: Border.all(color: AppColors.border(context)),
                 ),
                 child: const Icon(Icons.repeat, color: AppColors.kraftBrown, size: 20),
               ),
@@ -597,7 +624,11 @@ class _RecurringExpensesList extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               subtitle: Text(
                 'DUE ON DAY ${rec.dayOfMonth} OF MONTH',
-                style: const TextStyle(fontSize: 10, color: Color(0xFF777777), letterSpacing: 0.5),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: AppColors.textMuted(context),
+                  letterSpacing: 0.5,
+                ),
               ),
               trailing: Text(
                 Money.format(rec.amountPaise, showDecimal: false),

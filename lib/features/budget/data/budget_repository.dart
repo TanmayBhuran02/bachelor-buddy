@@ -73,7 +73,7 @@ class BudgetRepository {
               ..where((c) => c.kind.equals('expense')))
             .get();
 
-        int overallLimit = 0;
+        int overallLimit = 25000 * 100; // Default ₹25,000
         final categoryLimits = <String, int>{};
 
         for (final b in budgets) {
