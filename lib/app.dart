@@ -17,9 +17,9 @@ class BachelorBuddyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final themeStyle = ref.watch(themeStyleProvider);
-    final showOnboarding = ref.watch(showOnboardingProvider);
+    final sketchbookPalette = ref.watch(sketchbookPaletteProvider);
     final isAuthenticated = ref.watch(isAuthenticatedProvider);
-    final router = createRouter(showOnboarding: showOnboarding);
+    final router = ref.watch(routerProvider);
 
     if (isAuthenticated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -30,8 +30,8 @@ class BachelorBuddyApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Bachelor Buddy',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.getLightTheme(themeStyle),
-      darkTheme: AppTheme.getDarkTheme(themeStyle),
+      theme: AppTheme.getLightTheme(themeStyle, sketchbookPalette),
+      darkTheme: AppTheme.getDarkTheme(themeStyle, sketchbookPalette),
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {

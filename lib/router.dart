@@ -2,8 +2,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'providers.dart';
 import 'features/home/ui/home_screen.dart';
 import 'features/expenses/ui/expenses_screen.dart';
 import 'features/expenses/ui/add_expense_screen.dart';
@@ -18,6 +20,11 @@ import 'shared/shell_scaffold.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final showOnboarding = ref.watch(showOnboardingProvider);
+  return createRouter(showOnboarding: showOnboarding);
+});
 
 GoRouter createRouter({bool showOnboarding = false}) {
   return GoRouter(

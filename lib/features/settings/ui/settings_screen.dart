@@ -24,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final themeStyle = ref.watch(themeStyleProvider);
+    final sketchbookPalette = ref.watch(sketchbookPaletteProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -79,6 +80,60 @@ class SettingsScreen extends ConsumerWidget {
                         );
                   },
                 ),
+                if (themeStyle == AppThemeStyle.rawSketchbook) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'SKETCHBOOK PALETTE',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    switch (sketchbookPalette) {
+                      SketchbookPalette.botanical =>
+                        'Botanical: Sage green, warm terracotta & linen vellum.',
+                      SketchbookPalette.blueprint =>
+                        'Blueprint: Drafting cobalt, cyan ink & ice vellum.',
+                      SketchbookPalette.sepia =>
+                        'Sepia: Warm walnut ink, antique olive & deckle parchment.',
+                    },
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMuted(context),
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  SegmentedButton<SketchbookPalette>(
+                    segments: const [
+                      ButtonSegment(
+                        value: SketchbookPalette.botanical,
+                        label: Text('BOTANICAL'),
+                        icon: Icon(Icons.eco_outlined, size: 16),
+                      ),
+                      ButtonSegment(
+                        value: SketchbookPalette.blueprint,
+                        label: Text('BLUEPRINT'),
+                        icon: Icon(Icons.architecture_outlined, size: 16),
+                      ),
+                      ButtonSegment(
+                        value: SketchbookPalette.sepia,
+                        label: Text('SEPIA'),
+                        icon: Icon(Icons.auto_stories_outlined, size: 16),
+                      ),
+                    ],
+                    selected: {sketchbookPalette},
+                    onSelectionChanged: (newSelection) async {
+                      final selectedPalette = newSelection.first;
+                      ref.read(sketchbookPaletteProvider.notifier).state =
+                          selectedPalette;
+                      final db = ref.read(databaseProvider);
+                      await db.into(db.appSettings).insertOnConflictUpdate(
+                            AppSettingsCompanion.insert(
+                              key: 'sketchbook_palette',
+                              value: selectedPalette.name,
+                            ),
+                          );
+                    },
+                  ),
+                ],
               ],
             ),
           ),

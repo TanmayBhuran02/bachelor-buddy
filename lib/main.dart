@@ -38,9 +38,10 @@ Future<void> main() async {
     debugPrint('Notification initialization error: $e');
   }
 
-  // Load user preferences from DB (default to light mode & neobrutalism)
+  // Load user preferences from DB (default to light mode, neobrutalism & botanical)
   ThemeMode initialTheme = ThemeMode.light;
   AppThemeStyle initialStyle = AppThemeStyle.neobrutalism;
+  SketchbookPalette initialPalette = SketchbookPalette.botanical;
   bool isBiometricLockEnabled = false;
 
   try {
@@ -60,6 +61,17 @@ Future<void> main() async {
       initialStyle = AppThemeStyle.neobrutalism;
     }
 
+    final paletteSetting = await (db.select(db.appSettings)
+          ..where((s) => s.key.equals('sketchbook_palette')))
+        .getSingleOrNull();
+    if (paletteSetting?.value == 'blueprint') {
+      initialPalette = SketchbookPalette.blueprint;
+    } else if (paletteSetting?.value == 'sepia') {
+      initialPalette = SketchbookPalette.sepia;
+    } else {
+      initialPalette = SketchbookPalette.botanical;
+    }
+
     final biometricSetting = await (db.select(db.appSettings)
           ..where((s) => s.key.equals('biometric_lock_enabled')))
         .getSingleOrNull();
@@ -74,6 +86,7 @@ Future<void> main() async {
         databaseProvider.overrideWithValue(db),
         themeModeProvider.overrideWith((ref) => initialTheme),
         themeStyleProvider.overrideWith((ref) => initialStyle),
+        sketchbookPaletteProvider.overrideWith((ref) => initialPalette),
         biometricLockEnabledProvider.overrideWith((ref) => isBiometricLockEnabled),
         isAuthenticatedProvider.overrideWith((ref) => !isBiometricLockEnabled),
       ],

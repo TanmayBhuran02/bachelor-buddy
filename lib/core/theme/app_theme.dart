@@ -1,6 +1,6 @@
 /// Neo-brutalism and Raw sketchbook aesthetic themes for Bachelor Buddy.
 /// Supports both Neobrutalism (bold borders, hard offset drop shadows, punchy colors)
-/// and Raw sketchbook (Space Mono, hand-drawn wobbly borders, paper/pencil tones).
+/// and Raw sketchbook with multiple color palettes (Botanical Sage, Blueprint Cyan, Sepia Walnut).
 library;
 
 import 'package:flutter/material.dart';
@@ -10,6 +10,13 @@ import 'package:google_fonts/google_fonts.dart';
 enum AppThemeStyle {
   neobrutalism,
   rawSketchbook,
+}
+
+/// Available color palettes for the Raw Sketchbook style.
+enum SketchbookPalette {
+  botanical, // Sage & Terracotta (Field Notebook) - Default
+  blueprint, // Cobalt & Cyan (Architect Studio)
+  sepia,     // Walnut & Amber (Traveler's Journal)
 }
 
 /// ThemeExtension providing custom design tokens to widgets.
@@ -23,6 +30,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     required this.borderStroke,
     required this.cardSurface,
     required this.shadowOffset,
+    this.sketchbookPalette = SketchbookPalette.botanical,
   });
 
   final AppThemeStyle style;
@@ -33,6 +41,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
   final Color borderStroke;
   final Color cardSurface;
   final Offset shadowOffset;
+  final SketchbookPalette sketchbookPalette;
 
   @override
   ThemeExtension<AppThemeExtension> copyWith({
@@ -44,6 +53,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     Color? borderStroke,
     Color? cardSurface,
     Offset? shadowOffset,
+    SketchbookPalette? sketchbookPalette,
   }) {
     return AppThemeExtension(
       style: style ?? this.style,
@@ -54,6 +64,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       borderStroke: borderStroke ?? this.borderStroke,
       cardSurface: cardSurface ?? this.cardSurface,
       shadowOffset: shadowOffset ?? this.shadowOffset,
+      sketchbookPalette: sketchbookPalette ?? this.sketchbookPalette,
     );
   }
 
@@ -72,6 +83,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       borderStroke: Color.lerp(borderStroke, other.borderStroke, t)!,
       cardSurface: Color.lerp(cardSurface, other.cardSurface, t)!,
       shadowOffset: Offset.lerp(shadowOffset, other.shadowOffset, t)!,
+      sketchbookPalette:
+          t < 0.5 ? sketchbookPalette : other.sketchbookPalette,
     );
   }
 }
@@ -305,6 +318,127 @@ class RawCardBorder extends OutlinedBorder {
   int get hashCode => Object.hash(side, seed, variance);
 }
 
+/// Palette tokens for Sketchbook themes across light and dark modes.
+class _SketchbookTokens {
+  final Color scaffold;
+  final Color card;
+  final Color border;
+  final Color primary;
+  final Color secondary;
+  final Color tertiary;
+  final Color warning;
+  final Color surfaceContainer;
+  final Color track;
+  final Color text;
+  final Color textMuted;
+
+  const _SketchbookTokens({
+    required this.scaffold,
+    required this.card,
+    required this.border,
+    required this.primary,
+    required this.secondary,
+    required this.tertiary,
+    required this.warning,
+    required this.surfaceContainer,
+    required this.track,
+    required this.text,
+    required this.textMuted,
+  });
+
+  static _SketchbookTokens get(SketchbookPalette palette, Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    switch (palette) {
+      case SketchbookPalette.botanical:
+        return isDark
+            ? const _SketchbookTokens(
+                scaffold: Color(0xFF131915),
+                card: Color(0xFF1A221C),
+                border: Color(0xFFC7C0B5),
+                primary: Color(0xFF7EAA8B),
+                secondary: Color(0xFFE07A5F),
+                tertiary: Color(0xFFE06D5E),
+                warning: Color(0xFFE0B253),
+                surfaceContainer: Color(0xFF1F2922),
+                track: Color(0xFF28352C),
+                text: Color(0xFFF4F1EA),
+                textMuted: Color(0xFFA5B0A8),
+              )
+            : const _SketchbookTokens(
+                scaffold: Color(0xFFF4F1EA),
+                card: Color(0xFFFAF7F0),
+                border: Color(0xFF1E2B20),
+                primary: Color(0xFF4E7A57),
+                secondary: Color(0xFFB85D43),
+                tertiary: Color(0xFFC45142),
+                warning: Color(0xFFC99738),
+                surfaceContainer: Color(0xFFE8E4DA),
+                track: Color(0xFFDDD8CC),
+                text: Color(0xFF1E2B20),
+                textMuted: Color(0xFF5A665C),
+              );
+
+      case SketchbookPalette.blueprint:
+        return isDark
+            ? const _SketchbookTokens(
+                scaffold: Color(0xFF0D1520),
+                card: Color(0xFF152030),
+                border: Color(0xFFC8DBF8),
+                primary: Color(0xFF5C8FF7),
+                secondary: Color(0xFF2DD4BF),
+                tertiary: Color(0xFFF87171),
+                warning: Color(0xFFFBBF24),
+                surfaceContainer: Color(0xFF1B293E),
+                track: Color(0xFF22334D),
+                text: Color(0xFFF0F5FD),
+                textMuted: Color(0xFF94A9C9),
+              )
+            : const _SketchbookTokens(
+                scaffold: Color(0xFFEDF2F7),
+                card: Color(0xFFF7FAFC),
+                border: Color(0xFF1A2536),
+                primary: Color(0xFF2B59C3),
+                secondary: Color(0xFF0098A6),
+                tertiary: Color(0xFFD9534F),
+                warning: Color(0xFFD98E04),
+                surfaceContainer: Color(0xFFDFE7EF),
+                track: Color(0xFFCFDCE8),
+                text: Color(0xFF1A2536),
+                textMuted: Color(0xFF536275),
+              );
+
+      case SketchbookPalette.sepia:
+        return isDark
+            ? const _SketchbookTokens(
+                scaffold: Color(0xFF181310),
+                card: Color(0xFF221C18),
+                border: Color(0xFFE2D6CB),
+                primary: Color(0xFFBFA08A),
+                secondary: Color(0xFF8AA87A),
+                tertiary: Color(0xFFD4685D),
+                warning: Color(0xFFE6A862),
+                surfaceContainer: Color(0xFF2B231E),
+                track: Color(0xFF362C26),
+                text: Color(0xFFF5EFEB),
+                textMuted: Color(0xFFAFA096),
+              )
+            : const _SketchbookTokens(
+                scaffold: Color(0xFFF5EFEB),
+                card: Color(0xFFFAF6F2),
+                border: Color(0xFF2A211B),
+                primary: Color(0xFF7D5A44),
+                secondary: Color(0xFF586B4D),
+                tertiary: Color(0xFFA6443B),
+                warning: Color(0xFFC07D38),
+                surfaceContainer: Color(0xFFEBE3DC),
+                track: Color(0xFFDED4CB),
+                text: Color(0xFF2A211B),
+                textMuted: Color(0xFF6B5C52),
+              );
+    }
+  }
+}
+
 class AppColors {
   // Neobrutalism palette
   static const neoYellow = Color(0xFFFFE600);
@@ -323,116 +457,98 @@ class AppColors {
   static const neoTrackDark = Color(0xFF333333);
   static const neoTrackLight = Color(0xFFEFE8DA);
 
-  // Primary palette — default / raw
-  static const primary = Color(0xFF5A5A8F);
-  static const primaryLight = Color(0xFF7E7EB0);
-  static const primaryDark = Color(0xFF3D3D6B);
+  // Default / fallback palette
+  static const primary = Color(0xFF4E7A57);
+  static const secondary = Color(0xFFB85D43);
+  static const tertiary = Color(0xFFC45142);
+  static const warning = Color(0xFFC99738);
 
-  // Secondary palette (muted teal / cyan)
-  static const secondary = Color(0xFF3A8C7A);
-  static const secondaryLight = Color(0xFF5BB09E);
-  static const secondaryDark = Color(0xFF1F6B5A);
-
-  // Tertiary palette (muted rust / coral)
-  static const tertiary = Color(0xFFC45B4A);
-  static const tertiaryLight = Color(0xFFD4847A);
-  static const tertiaryDark = Color(0xFF9A3D2E);
-
-  // Warning — muted amber
-  static const warning = Color(0xFFB89545);
-  static const warningDark = Color(0xFF8E6F2A);
-
-  // Budget states
   static const budgetGreen = Color(0xFF4A8A4E);
   static const budgetAmber = Color(0xFFB89545);
   static const budgetRed = Color(0xFFC45B4A);
 
-  // Paper / Raw surfaces
   static const paperWhite = Color(0xFFFAFAF8);
-  static const pencilGrey = Color(0xFF4A4A4A);
   static const markerBlack = Color(0xFF1A1A1A);
   static const kraftBrown = Color(0xFFC4A77D);
-
-  // Dark surfaces — raw, no blue tint
-  static const surfaceDark = Color(0xFF111111);
-  static const cardDark = Color(0xFF1A1A1A);
-  static const surfaceContainerDark = Color(0xFF1A1A1A);
-  static const surfaceContainerHighDark = Color(0xFF252525);
-  static const surfaceContainerHighestDark = Color(0xFF333333);
-
-  // Light surfaces — warm parchment sketchbook
-  static const lightPaperScaffold = Color(0xFFF7F5EE);
-  static const lightCardBg = Color(0xFFFFFEEF);
-  static const lightBorder = Color(0xFF1A1A1A);
-  static const lightSurfaceContainer = Color(0xFFECE7DA);
-  static const lightTrack = Color(0xFFE2DCCF);
 
   static AppThemeStyle styleOf(BuildContext context) =>
       Theme.of(context).extension<AppThemeExtension>()?.style ??
       AppThemeStyle.neobrutalism;
 
+  static SketchbookPalette sketchbookPaletteOf(BuildContext context) =>
+      Theme.of(context).extension<AppThemeExtension>()?.sketchbookPalette ??
+      SketchbookPalette.botanical;
+
+  static Color primaryOf(BuildContext context) =>
+      Theme.of(context).extension<AppThemeExtension>()?.primaryAccent ?? primary;
+
+  static Color secondaryOf(BuildContext context) =>
+      Theme.of(context).extension<AppThemeExtension>()?.secondaryAccent ?? secondary;
+
+  static Color tertiaryOf(BuildContext context) =>
+      Theme.of(context).extension<AppThemeExtension>()?.tertiaryAccent ?? tertiary;
+
+  static Color warningOf(BuildContext context) =>
+      Theme.of(context).extension<AppThemeExtension>()?.warningAccent ?? warning;
+
   // Dynamic context-aware helpers
   static Color text(BuildContext context) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = styleOf(context);
-    if (style == AppThemeStyle.neobrutalism) {
+    if (ext?.style == AppThemeStyle.neobrutalism) {
       return isDark ? neoWhite : neoBlack;
     }
-    return isDark ? paperWhite : markerBlack;
+    return isDark ? const Color(0xFFF4F1EA) : (ext?.borderStroke ?? const Color(0xFF1E2B20));
   }
 
   static Color textMuted(BuildContext context) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = styleOf(context);
-    if (style == AppThemeStyle.neobrutalism) {
+    if (ext?.style == AppThemeStyle.neobrutalism) {
       return isDark ? const Color(0xFFBBBBBB) : const Color(0xFF444444);
     }
-    return isDark ? const Color(0xFF888888) : const Color(0xFF666666);
+    return isDark ? const Color(0xFFA5B0A8) : const Color(0xFF5A665C);
   }
 
   static Color textSubtle(BuildContext context) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = styleOf(context);
-    if (style == AppThemeStyle.neobrutalism) {
+    if (ext?.style == AppThemeStyle.neobrutalism) {
       return isDark ? const Color(0xFF888888) : const Color(0xFF666666);
     }
-    return isDark ? const Color(0xFF555555) : const Color(0xFF888888);
+    return isDark ? const Color(0xFF7A857D) : const Color(0xFF7A877E);
   }
 
   static Color border(BuildContext context) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
+    if (ext != null) return ext.borderStroke;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = styleOf(context);
-    if (style == AppThemeStyle.neobrutalism) {
-      return isDark ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
-    }
-    return isDark ? const Color(0xFF3A3A3A) : const Color(0xFF1A1A1A);
+    return isDark ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
   }
 
   static Color surface(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = styleOf(context);
-    if (style == AppThemeStyle.neobrutalism) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
+    if (ext?.style == AppThemeStyle.neobrutalism) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return isDark ? neoSurfaceDark : neoSurfaceLight;
     }
-    return isDark ? const Color(0xFF1F1F1F) : const Color(0xFFECE7DA);
+    return Theme.of(context).colorScheme.surfaceContainer;
   }
 
   static Color track(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = styleOf(context);
-    if (style == AppThemeStyle.neobrutalism) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
+    if (ext?.style == AppThemeStyle.neobrutalism) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return isDark ? neoTrackDark : neoTrackLight;
     }
-    return isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE2DCCF);
+    return Theme.of(context).colorScheme.surfaceContainerHigh;
   }
 
   static Color card(BuildContext context) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
+    if (ext != null) return ext.cardSurface;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = styleOf(context);
-    if (style == AppThemeStyle.neobrutalism) {
-      return isDark ? neoCardDark : neoWhite;
-    }
-    return isDark ? cardDark : lightCardBg;
+    return isDark ? neoCardDark : neoWhite;
   }
 }
 
@@ -466,16 +582,22 @@ class AppTheme {
   static ThemeData get lightTheme => getLightTheme(AppThemeStyle.neobrutalism);
   static ThemeData get darkTheme => getDarkTheme(AppThemeStyle.neobrutalism);
 
-  static ThemeData getLightTheme([AppThemeStyle style = AppThemeStyle.neobrutalism]) {
+  static ThemeData getLightTheme([
+    AppThemeStyle style = AppThemeStyle.neobrutalism,
+    SketchbookPalette palette = SketchbookPalette.botanical,
+  ]) {
     return style == AppThemeStyle.neobrutalism
         ? _buildNeobrutalismTheme(brightness: Brightness.light)
-        : _buildRawTheme(brightness: Brightness.light);
+        : _buildRawTheme(brightness: Brightness.light, palette: palette);
   }
 
-  static ThemeData getDarkTheme([AppThemeStyle style = AppThemeStyle.neobrutalism]) {
+  static ThemeData getDarkTheme([
+    AppThemeStyle style = AppThemeStyle.neobrutalism,
+    SketchbookPalette palette = SketchbookPalette.botanical,
+  ]) {
     return style == AppThemeStyle.neobrutalism
         ? _buildNeobrutalismTheme(brightness: Brightness.dark)
-        : _buildRawTheme(brightness: Brightness.dark);
+        : _buildRawTheme(brightness: Brightness.dark, palette: palette);
   }
 
   // ─── NEOBRUTALISM THEME BUILDER ──────────────────────────────────────────
@@ -711,19 +833,17 @@ class AppTheme {
           ),
         ),
       ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
+      elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(Colors.transparent),
-          foregroundColor: WidgetStateProperty.all(
-            isDark ? AppColors.neoWhite : const Color(0xFF000000),
-          ),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) return const Color(0xFFCCCCCC);
+            return AppColors.neoYellow;
+          }),
+          foregroundColor: WidgetStateProperty.all(const Color(0xFF000000)),
           shape: WidgetStateProperty.resolveWith((states) {
             final isPressed = states.contains(WidgetState.pressed);
             return NeoCardBorder(
-              side: BorderSide(
-                color: isDark ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
-                width: 2.5,
-              ),
+              side: const BorderSide(color: Color(0xFF000000), width: 2.5),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
               shadowOffset: isPressed ? const Offset(1, 1) : const Offset(3.5, 3.5),
               shadowColor: const Color(0xFF000000),
@@ -741,17 +861,19 @@ class AppTheme {
           ),
         ),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
+      outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) return const Color(0xFFCCCCCC);
-            return AppColors.neoYellow;
-          }),
-          foregroundColor: WidgetStateProperty.all(const Color(0xFF000000)),
+          backgroundColor: WidgetStateProperty.all(Colors.transparent),
+          foregroundColor: WidgetStateProperty.all(
+            isDark ? AppColors.neoWhite : const Color(0xFF000000),
+          ),
           shape: WidgetStateProperty.resolveWith((states) {
             final isPressed = states.contains(WidgetState.pressed);
             return NeoCardBorder(
-              side: const BorderSide(color: Color(0xFF000000), width: 2.5),
+              side: BorderSide(
+                color: isDark ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+                width: 2.5,
+              ),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
               shadowOffset: isPressed ? const Offset(1, 1) : const Offset(3.5, 3.5),
               shadowColor: const Color(0xFF000000),
@@ -819,189 +941,204 @@ class AppTheme {
 
   // ─── RAW SKETCHBOOK THEME BUILDER ────────────────────────────────────────
 
-  static ThemeData _buildRawTheme({required Brightness brightness}) {
-    final isDark = brightness == Brightness.dark;
-    if (isDark) {
-      return _buildRawDarkTheme();
-    } else {
-      return _buildRawLightTheme();
-    }
-  }
+  static ThemeData _buildRawTheme({
+    required Brightness brightness,
+    SketchbookPalette palette = SketchbookPalette.botanical,
+  }) {
+    final colors = _SketchbookTokens.get(palette, brightness);
 
-  static ThemeData _buildRawDarkTheme() {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.dark,
-      primary: AppColors.primary,
-      secondary: AppColors.secondary,
-      tertiary: AppColors.tertiary,
-      surface: AppColors.surfaceDark,
-      surfaceContainerLowest: AppColors.surfaceDark,
-      surfaceContainerLow: const Color(0xFF161616),
-      surfaceContainer: AppColors.surfaceContainerDark,
-      surfaceContainerHigh: AppColors.surfaceContainerHighDark,
-      surfaceContainerHighest: AppColors.surfaceContainerHighestDark,
-      error: AppColors.tertiary,
+    final colorScheme = ColorScheme(
+      brightness: brightness,
+      primary: colors.primary,
+      onPrimary: colors.card,
+      secondary: colors.secondary,
+      onSecondary: colors.card,
+      tertiary: colors.tertiary,
+      onTertiary: colors.card,
+      error: colors.tertiary,
+      onError: colors.card,
+      surface: colors.scaffold,
+      onSurface: colors.text,
+      surfaceContainerLowest: colors.scaffold,
+      surfaceContainerLow: colors.surfaceContainer,
+      surfaceContainer: colors.surfaceContainer,
+      surfaceContainerHigh: colors.track,
+      surfaceContainerHighest: colors.track,
+      outline: colors.border,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.surfaceDark,
-      textTheme: _rawTextTheme(AppColors.paperWhite),
-      extensions: const [
+      brightness: brightness,
+      scaffoldBackgroundColor: colors.scaffold,
+      textTheme: _rawTextTheme(colors.text),
+      extensions: [
         AppThemeExtension(
           style: AppThemeStyle.rawSketchbook,
-          primaryAccent: AppColors.primary,
-          secondaryAccent: AppColors.secondary,
-          tertiaryAccent: AppColors.tertiary,
-          warningAccent: AppColors.warning,
-          borderStroke: Color(0xFF3A3A3A),
-          cardSurface: AppColors.cardDark,
+          primaryAccent: colors.primary,
+          secondaryAccent: colors.secondary,
+          tertiaryAccent: colors.tertiary,
+          warningAccent: colors.warning,
+          borderStroke: colors.border,
+          cardSurface: colors.card,
           shadowOffset: Offset.zero,
+          sketchbookPalette: palette,
         ),
       ],
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.surfaceDark,
-        foregroundColor: AppColors.paperWhite,
+        backgroundColor: colors.scaffold,
+        foregroundColor: colors.text,
         elevation: 0,
         scrolledUnderElevation: 0,
         titleTextStyle: _fontStyle(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: AppColors.paperWhite,
+          color: colors.text,
           letterSpacing: -0.5,
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.cardDark,
+        color: colors.card,
         elevation: 0,
         clipBehavior: Clip.antiAlias,
-        shape: const RawCardBorder(
+        shape: RawCardBorder(
           side: BorderSide(
-            color: Color(0xFF3A3A3A),
+            color: colors.border,
             width: 1.5,
           ),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.surfaceDark,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+        backgroundColor: colors.scaffold,
+        indicatorColor: colors.primary.withValues(alpha: 0.18),
         surfaceTintColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return _fontStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: AppColors.paperWhite,
+              color: colors.text,
               letterSpacing: 0.5,
             );
           }
           return _fontStyle(
             fontSize: 10,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF666666),
+            color: colors.textMuted,
             letterSpacing: 0.5,
           );
         }),
         height: 64,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.paperWhite,
-        foregroundColor: AppColors.markerBlack,
+        backgroundColor: colors.text,
+        foregroundColor: colors.card,
         elevation: 0,
-        shape: const RawCardBorder(
+        shape: RawCardBorder(
           side: BorderSide(
-            color: AppColors.markerBlack,
+            color: colors.border,
             width: 1.5,
           ),
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.surfaceContainerHighDark,
+        backgroundColor: colors.surfaceContainer,
         labelStyle: _fontStyle(
           fontSize: 11,
           letterSpacing: 0.3,
-          color: AppColors.paperWhite,
+          color: colors.text,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(2),
         ),
-        side: const BorderSide(color: Color(0xFF3A3A3A)),
+        side: BorderSide(color: colors.border, width: 1.2),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.cardDark,
-        shape: RoundedRectangleBorder(
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colors.card,
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.surfaceContainerHighestDark,
+        backgroundColor: colors.text,
         contentTextStyle: _fontStyle(
-          color: AppColors.paperWhite,
+          color: colors.card,
           fontSize: 12,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
         behavior: SnackBarBehavior.floating,
       ),
-      dividerTheme: const DividerThemeData(
-        color: Color(0xFF3A3A3A),
+      dividerTheme: DividerThemeData(
+        color: colors.border.withValues(alpha: 0.3),
         thickness: 1,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceContainerHighDark,
+        fillColor: colors.surfaceContainer,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(2),
-          borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
+          borderSide: BorderSide(color: colors.border, width: 1.2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(2),
-          borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
+          borderSide: BorderSide(color: colors.border, width: 1.2),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(2),
-          borderSide: const BorderSide(color: AppColors.paperWhite, width: 2),
+          borderSide: BorderSide(color: colors.text, width: 2),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         labelStyle: _fontStyle(
           fontSize: 12,
-          color: const Color(0xFF888888),
+          color: colors.textMuted,
         ),
         hintStyle: _fontStyle(
           fontSize: 12,
-          color: const Color(0xFF555555),
+          color: colors.textMuted.withValues(alpha: 0.7),
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.cardDark,
-        shape: const RawCardBorder(
-          side: BorderSide(color: Color(0xFF3A3A3A), width: 1.5),
+        backgroundColor: colors.card,
+        shape: RawCardBorder(
+          side: BorderSide(color: colors.border, width: 1.5),
         ),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.paperWhite;
+            return colors.text;
           }
-          return const Color(0xFF666666);
+          return colors.textMuted;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.primary.withValues(alpha: 0.5);
+            return colors.primary.withValues(alpha: 0.4);
           }
-          return const Color(0xFF333333);
+          return colors.surfaceContainer;
         }),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.paperWhite,
-          foregroundColor: AppColors.markerBlack,
-          shape: const RawCardBorder(
-            side: BorderSide(color: AppColors.paperWhite, width: 1.5),
+          backgroundColor: colors.text,
+          foregroundColor: colors.card,
+          shape: RawCardBorder(
+            side: BorderSide(color: colors.border, width: 1.5),
+          ),
+          textStyle: _fontStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.text,
+          foregroundColor: colors.card,
+          shape: RawCardBorder(
+            side: BorderSide(color: colors.border, width: 1.5),
           ),
           textStyle: _fontStyle(
             fontSize: 14,
@@ -1012,10 +1149,10 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.paperWhite,
-          side: const BorderSide(color: Color(0xFF555555), width: 1.5),
-          shape: const RawCardBorder(
-            side: BorderSide(color: Color(0xFF555555), width: 1.5),
+          foregroundColor: colors.text,
+          side: BorderSide(color: colors.border, width: 1.5),
+          shape: RawCardBorder(
+            side: BorderSide(color: colors.border, width: 1.5),
           ),
           textStyle: _fontStyle(
             fontSize: 14,
@@ -1026,7 +1163,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.paperWhite,
+          foregroundColor: colors.text,
           textStyle: _fontStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
@@ -1046,244 +1183,14 @@ class AppTheme {
       ),
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(1)),
-        side: const BorderSide(color: Color(0xFF555555), width: 1.5),
-      ),
-      listTileTheme: const ListTileThemeData(
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        borderRadius: BorderRadius.circular(0),
-      ),
-    );
-  }
-
-  static ThemeData _buildRawLightTheme() {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
-      primary: AppColors.primary,
-      secondary: AppColors.secondary,
-      tertiary: AppColors.tertiary,
-      surface: AppColors.lightPaperScaffold,
-      surfaceContainerLowest: AppColors.lightPaperScaffold,
-      surfaceContainerLow: const Color(0xFFF0ECE0),
-      surfaceContainer: AppColors.lightSurfaceContainer,
-      surfaceContainerHigh: const Color(0xFFE5DFC9),
-      surfaceContainerHighest: const Color(0xFFDCD5BE),
-      error: AppColors.tertiary,
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: colorScheme,
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: AppColors.lightPaperScaffold,
-      textTheme: _rawTextTheme(AppColors.markerBlack),
-      extensions: const [
-        AppThemeExtension(
-          style: AppThemeStyle.rawSketchbook,
-          primaryAccent: AppColors.primary,
-          secondaryAccent: AppColors.secondary,
-          tertiaryAccent: AppColors.tertiary,
-          warningAccent: AppColors.warning,
-          borderStroke: AppColors.lightBorder,
-          cardSurface: AppColors.lightCardBg,
-          shadowOffset: Offset.zero,
-        ),
-      ],
-      appBarTheme: AppBarTheme(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColors.lightPaperScaffold,
-        foregroundColor: AppColors.markerBlack,
-        titleTextStyle: _fontStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: AppColors.markerBlack,
-          letterSpacing: -0.5,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        elevation: 0,
-        color: AppColors.lightCardBg,
-        clipBehavior: Clip.antiAlias,
-        shape: const RawCardBorder(
-          side: BorderSide(
-            color: AppColors.lightBorder,
-            width: 1.5,
-          ),
-        ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.lightPaperScaffold,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
-        surfaceTintColor: Colors.transparent,
-        labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return _fontStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: AppColors.markerBlack,
-              letterSpacing: 0.5,
-            );
-          }
-          return _fontStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF777777),
-            letterSpacing: 0.5,
-          );
-        }),
-        height: 64,
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.markerBlack,
-        foregroundColor: AppColors.lightCardBg,
-        elevation: 0,
-        shape: const RawCardBorder(
-          side: BorderSide(
-            color: AppColors.markerBlack,
-            width: 1.5,
-          ),
-        ),
-      ),
-      chipTheme: ChipThemeData(
-        backgroundColor: AppColors.lightSurfaceContainer,
-        labelStyle: _fontStyle(
-          fontSize: 11,
-          letterSpacing: 0.3,
-          color: AppColors.markerBlack,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2),
-        ),
-        side: const BorderSide(color: AppColors.lightBorder, width: 1.2),
-      ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.lightCardBg,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(2)),
-        ),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.markerBlack,
-        contentTextStyle: _fontStyle(
-          color: AppColors.lightCardBg,
-          fontSize: 12,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-        behavior: SnackBarBehavior.floating,
-      ),
-      dividerTheme: const DividerThemeData(
-        color: Color(0xFFD6CFC0),
-        thickness: 1,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.lightSurfaceContainer,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(2),
-          borderSide: const BorderSide(color: AppColors.lightBorder, width: 1.2),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(2),
-          borderSide: const BorderSide(color: AppColors.lightBorder, width: 1.2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(2),
-          borderSide:
-              const BorderSide(color: AppColors.markerBlack, width: 2),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        labelStyle: _fontStyle(
-          fontSize: 12,
-          color: const Color(0xFF666666),
-        ),
-        hintStyle: _fontStyle(
-          fontSize: 12,
-          color: const Color(0xFF888888),
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.lightCardBg,
-        shape: const RawCardBorder(
-          side: BorderSide(color: AppColors.lightBorder, width: 1.5),
-        ),
-      ),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.markerBlack;
-          }
-          return const Color(0xFF888888);
-        }),
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.primary.withValues(alpha: 0.3);
-          }
-          return const Color(0xFFD0C9BA);
-        }),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.markerBlack,
-          foregroundColor: AppColors.lightCardBg,
-          shape: const RawCardBorder(
-            side: BorderSide(color: AppColors.markerBlack, width: 1.5),
-          ),
-          textStyle: _fontStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.markerBlack,
-          side: const BorderSide(color: AppColors.lightBorder, width: 1.5),
-          shape: const RawCardBorder(
-            side: BorderSide(color: AppColors.lightBorder, width: 1.5),
-          ),
-          textStyle: _fontStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.markerBlack,
-          textStyle: _fontStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ),
-      segmentedButtonTheme: SegmentedButtonThemeData(
-        style: ButtonStyle(
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-          ),
-        ),
-      ),
-      checkboxTheme: CheckboxThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(1)),
-        side: const BorderSide(color: AppColors.lightBorder, width: 1.5),
+        side: BorderSide(color: colors.border, width: 1.5),
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.markerBlack;
+            return colors.text;
           }
           return Colors.transparent;
         }),
-        checkColor: WidgetStateProperty.all(AppColors.lightCardBg),
+        checkColor: WidgetStateProperty.all(colors.card),
       ),
       listTileTheme: const ListTileThemeData(
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -1482,4 +1389,3 @@ class AppTheme {
         ),
       );
 }
-

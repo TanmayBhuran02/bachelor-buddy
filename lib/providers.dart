@@ -10,7 +10,7 @@ import 'core/events/domain_event.dart';
 import 'features/actions/action_intent.dart';
 import 'features/actions/local_intent_parser.dart';
 
-export 'core/theme/app_theme.dart' show AppThemeStyle;
+export 'core/theme/app_theme.dart' show AppThemeStyle, SketchbookPalette;
 
 // ─── Database ──────────────────────────────────────────────────────────────
 
@@ -48,6 +48,10 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) {
 
 final themeStyleProvider = StateProvider<AppThemeStyle>((ref) {
   return AppThemeStyle.neobrutalism; // Default to Neo-Brutalism
+});
+
+final sketchbookPaletteProvider = StateProvider<SketchbookPalette>((ref) {
+  return SketchbookPalette.botanical; // Default to Botanical Sage & Terracotta
 });
 
 // ─── Security & Biometrics ──────────────────────────────────────────────────

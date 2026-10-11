@@ -53,6 +53,63 @@ void main() {
       expect(rawDark.cardTheme.shape, isA<RawCardBorder>());
     });
 
+    test('Default sketchbookPaletteProvider is botanical', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(
+        container.read(sketchbookPaletteProvider),
+        SketchbookPalette.botanical,
+      );
+    });
+
+    test('Can switch sketchbookPaletteProvider between palettes', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      container.read(sketchbookPaletteProvider.notifier).state =
+          SketchbookPalette.blueprint;
+      expect(
+        container.read(sketchbookPaletteProvider),
+        SketchbookPalette.blueprint,
+      );
+
+      container.read(sketchbookPaletteProvider.notifier).state =
+          SketchbookPalette.sepia;
+      expect(
+        container.read(sketchbookPaletteProvider),
+        SketchbookPalette.sepia,
+      );
+    });
+
+    test('AppTheme generates Raw Sketchbook themes for all palettes with proper extensions', () {
+      for (final palette in SketchbookPalette.values) {
+        final lightTheme = AppTheme.getLightTheme(
+          AppThemeStyle.rawSketchbook,
+          palette,
+        );
+        final darkTheme = AppTheme.getDarkTheme(
+          AppThemeStyle.rawSketchbook,
+          palette,
+        );
+
+        expect(lightTheme.brightness, Brightness.light);
+        expect(darkTheme.brightness, Brightness.dark);
+        expect(lightTheme.cardTheme.shape, isA<RawCardBorder>());
+        expect(darkTheme.cardTheme.shape, isA<RawCardBorder>());
+
+        final lightExt = lightTheme.extension<AppThemeExtension>();
+        final darkExt = darkTheme.extension<AppThemeExtension>();
+
+        expect(lightExt, isNotNull);
+        expect(darkExt, isNotNull);
+        expect(lightExt!.style, AppThemeStyle.rawSketchbook);
+        expect(lightExt.sketchbookPalette, palette);
+        expect(darkExt!.style, AppThemeStyle.rawSketchbook);
+        expect(darkExt.sketchbookPalette, palette);
+      }
+    });
+
     test('NeoCardBorder dimensions and equality', () {
       const border1 = NeoCardBorder();
       const border2 = NeoCardBorder();

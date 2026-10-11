@@ -1,87 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_water_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_background"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:background="@android:color/transparent">
 
-    <!-- Top Row: Title + Progress Values -->
-    <LinearLayout
+    <ImageView
+        android:id="@+id/water_widget_circle_image"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:contentDescription="Hydration Tracker Circle Button"
+        android:scaleType="fitCenter" />
+</FrameLayout>
 
-        <TextView
-            android:id="@+id/water_widget_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="WATER //"
-            android:textColor="#1A1A1A"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/water_widget_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1,600 / 2,500 ml"
-            android:textColor="#1A1A1A"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- Compact Progress Bar (4dp high) -->
-    <ProgressBar
-        android:id="@+id/water_widget_progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:max="100"
-        android:progress="64"
-        android:progressDrawable="@drawable/widget_progress_teal" />
-
-    <!-- Bottom Row: Status + Quick Action Button -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/water_widget_glasses"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="8 glasses (64%)"
-            android:textColor="#666666"
-            android:textSize="10sp" />
-
-        <LinearLayout
-            android:id="@+id/btn_water_add"
-            android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:background="@drawable/widget_btn_teal"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp">
-
-            <TextView
-                android:id="@+id/btn_water_add_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+200 ml"
-                android:textColor="#FFFEEF"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
