@@ -188,13 +188,14 @@ class _OverallBudgetCard extends StatelessWidget {
     final hasLimit = overview.limitPaise > 0;
     final pct = (overview.percentage * 100).clamp(0, 100).toInt();
 
+    final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
     Color progressColor;
     if (overview.percentage > 0.9) {
-      progressColor = AppColors.tertiary; // Red
+      progressColor = isNeo ? AppColors.neoPink : AppColors.tertiary;
     } else if (overview.percentage > 0.75) {
-      progressColor = AppColors.warning; // Amber
+      progressColor = isNeo ? AppColors.neoOrange : AppColors.warning;
     } else {
-      progressColor = AppColors.secondary; // Teal
+      progressColor = isNeo ? AppColors.neoGreen : AppColors.secondary;
     }
 
     return Card(

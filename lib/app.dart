@@ -16,6 +16,7 @@ class BachelorBuddyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final themeStyle = ref.watch(themeStyleProvider);
     final showOnboarding = ref.watch(showOnboardingProvider);
     final isAuthenticated = ref.watch(isAuthenticatedProvider);
     final router = createRouter(showOnboarding: showOnboarding);
@@ -29,8 +30,8 @@ class BachelorBuddyApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Bachelor Buddy',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.getLightTheme(themeStyle),
+      darkTheme: AppTheme.getDarkTheme(themeStyle),
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {

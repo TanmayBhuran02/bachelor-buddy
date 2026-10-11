@@ -131,16 +131,22 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
+    final selectedBg = isNeo
+        ? AppColors.neoYellow
+        : (isDark ? AppColors.paperWhite : AppColors.markerBlack);
+    final selectedText = isNeo
+        ? const Color(0xFF000000)
+        : (isDark ? AppColors.markerBlack : AppColors.paperWhite);
+
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: isDark ? AppColors.paperWhite : AppColors.markerBlack,
+      selectedColor: selectedBg,
       labelStyle: TextStyle(
-        color: isSelected
-            ? (isDark ? AppColors.markerBlack : AppColors.paperWhite)
-            : AppColors.textMuted(context),
-        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+        color: isSelected ? selectedText : AppColors.textMuted(context),
+        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
         fontSize: 10,
         letterSpacing: 0.5,
       ),
@@ -169,11 +175,12 @@ class _TodoItemTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(todoRepositoryProvider);
     final isLocked = _isLockedPastRecurring();
+    final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
 
     Color priorityColor = switch (todo.priority) {
-      0 => AppColors.tertiary,
-      1 => AppColors.warning,
-      _ => AppColors.secondary,
+      0 => isNeo ? AppColors.neoPink : AppColors.tertiary,
+      1 => isNeo ? AppColors.neoOrange : AppColors.warning,
+      _ => isNeo ? AppColors.neoCyan : AppColors.secondary,
     };
 
     String? actionLabel;

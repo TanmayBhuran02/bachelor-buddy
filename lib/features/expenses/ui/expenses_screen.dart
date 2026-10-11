@@ -527,6 +527,10 @@ class _MonthlySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
+    final incomeColor = isNeo ? AppColors.neoGreen : AppColors.secondary;
+    final expenseColor = isNeo ? AppColors.neoPink : AppColors.tertiary;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
@@ -536,16 +540,16 @@ class _MonthlySummary extends StatelessWidget {
           children: [
             _SummaryItem('INCOME',
                 Money.format(totals.totalIncomePaise, showDecimal: false),
-                AppColors.secondary),
+                incomeColor),
             Container(
-                width: 1,
+                width: isNeo ? 2 : 1,
                 height: 32,
                 color: AppColors.border(context)),
             _SummaryItem('EXPENSES',
                 Money.format(totals.totalExpensePaise, showDecimal: false),
-                AppColors.tertiary),
+                expenseColor),
             Container(
-                width: 1,
+                width: isNeo ? 2 : 1,
                 height: 32,
                 color: AppColors.border(context)),
             _SummaryItem('BALANCE',

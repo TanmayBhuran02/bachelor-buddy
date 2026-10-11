@@ -61,6 +61,9 @@ class _WaterBody extends ConsumerWidget {
     final percent = (status.progress * 100).round();
     final remaining = (status.goalMl - status.intakeMl).clamp(0, status.goalMl);
 
+    final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
+    final progressColor = isNeo ? AppColors.neoCyan : AppColors.secondary;
+
     return Column(
       children: [
         const Spacer(flex: 2),
@@ -73,6 +76,7 @@ class _WaterBody extends ConsumerWidget {
             painter: _HydrationRingPainter(
               progress: status.progress,
               trackColor: AppColors.track(context),
+              progressColor: progressColor,
             ),
             child: Center(
               child: Column(
@@ -80,19 +84,29 @@ class _WaterBody extends ConsumerWidget {
                 children: [
                   // Water drop icon in square container
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      color: AppColors.surface(context),
+                      borderRadius: BorderRadius.circular(isNeo ? 6 : 2),
+                      color: isNeo ? AppColors.neoCyan : AppColors.surface(context),
                       border: Border.all(
                         color: AppColors.border(context),
+                        width: isNeo ? 2.5 : 1.0,
                       ),
+                      boxShadow: isNeo
+                          ? const [
+                              BoxShadow(
+                                color: Color(0xFF000000),
+                                offset: Offset(2.0, 2.0),
+                                blurRadius: 0,
+                              ),
+                            ]
+                          : null,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.water_drop,
-                      color: AppColors.secondary,
-                      size: 18,
+                      color: isNeo ? const Color(0xFF000000) : AppColors.secondary,
+                      size: 20,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -107,7 +121,7 @@ class _WaterBody extends ConsumerWidget {
                               .textTheme
                               .headlineLarge
                               ?.copyWith(
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w800,
                                 color: AppColors.text(context),
                               ),
                         ),
@@ -117,8 +131,8 @@ class _WaterBody extends ConsumerWidget {
                               .textTheme
                               .labelSmall
                               ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.secondary,
+                                fontWeight: FontWeight.w700,
+                                color: progressColor,
                                 letterSpacing: 1,
                               ),
                         ),
@@ -139,20 +153,30 @@ class _WaterBody extends ConsumerWidget {
                   // Percentage pill badge (square corners)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                        horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      color: AppColors.surface(context),
+                      borderRadius: BorderRadius.circular(isNeo ? 4 : 2),
+                      color: isNeo ? AppColors.neoYellow : AppColors.surface(context),
                       border: Border.all(
                         color: AppColors.border(context),
+                        width: isNeo ? 2.0 : 1.0,
                       ),
+                      boxShadow: isNeo
+                          ? const [
+                              BoxShadow(
+                                color: Color(0xFF000000),
+                                offset: Offset(2.0, 2.0),
+                                blurRadius: 0,
+                              ),
+                            ]
+                          : null,
                     ),
                     child: Text(
                       '$percent% OF GOAL',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.secondary,
+                        fontWeight: FontWeight.w800,
+                        color: isNeo ? const Color(0xFF000000) : AppColors.secondary,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -217,10 +241,12 @@ class _WaterBody extends ConsumerWidget {
 class _HydrationRingPainter extends CustomPainter {
   final double progress;
   final Color trackColor;
+  final Color progressColor;
 
   _HydrationRingPainter({
     required this.progress,
     required this.trackColor,
+    this.progressColor = AppColors.secondary,
   });
 
   @override
@@ -245,7 +271,7 @@ class _HydrationRingPainter extends CustomPainter {
       final rect = Rect.fromCircle(center: center, radius: radius);
 
       final arcPaint = Paint()
-        ..color = AppColors.secondary
+        ..color = progressColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.square;
@@ -256,7 +282,9 @@ class _HydrationRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_HydrationRingPainter old) =>
-      old.progress != progress || old.trackColor != trackColor;
+      old.progress != progress ||
+      old.trackColor != trackColor ||
+      old.progressColor != progressColor;
 }
 
 // ─── Settings Bottom Sheet ─────────────────────────────────────────────────

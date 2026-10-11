@@ -459,7 +459,11 @@ class _TiffinMealCard extends ConsumerWidget {
                         : plan.mealType == 'lunch'
                             ? Icons.lunch_dining
                             : Icons.breakfast_dining,
-                    color: AppColors.kraftBrown,
+                    color: AppColors.styleOf(context) == AppThemeStyle.neobrutalism
+                        ? (plan.mealType == 'dinner'
+                            ? AppColors.neoPurple
+                            : AppColors.neoOrange)
+                        : AppColors.kraftBrown,
                     size: 20,
                   ),
                 ),

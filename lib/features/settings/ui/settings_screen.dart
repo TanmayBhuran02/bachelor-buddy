@@ -23,6 +23,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final themeStyle = ref.watch(themeStyleProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +33,56 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
           // Appearance section
-          _SectionHeader(title: 'APPEARANCE'),
+          const _SectionHeader(title: 'APPEARANCE'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'AESTHETIC STYLE',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  themeStyle == AppThemeStyle.neobrutalism
+                      ? 'Neo-Brutalism: Thick borders, hard drop shadows, hyper-saturated pops.'
+                      : 'Raw Sketchbook: Anti-polish, hand-drawn wobbly outlines, paper tones.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textMuted(context),
+                      ),
+                ),
+                const SizedBox(height: 10),
+                SegmentedButton<AppThemeStyle>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AppThemeStyle.neobrutalism,
+                      label: Text('NEOBRUTALISM'),
+                      icon: Icon(Icons.flash_on, size: 16),
+                    ),
+                    ButtonSegment(
+                      value: AppThemeStyle.rawSketchbook,
+                      label: Text('SKETCHBOOK'),
+                      icon: Icon(Icons.draw_outlined, size: 16),
+                    ),
+                  ],
+                  selected: {themeStyle},
+                  onSelectionChanged: (newSelection) async {
+                    final selectedStyle = newSelection.first;
+                    ref.read(themeStyleProvider.notifier).state = selectedStyle;
+                    final db = ref.read(databaseProvider);
+                    await db.into(db.appSettings).insertOnConflictUpdate(
+                          AppSettingsCompanion.insert(
+                            key: 'theme_style',
+                            value: selectedStyle.name,
+                          ),
+                        );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
           SwitchListTile(
             secondary: const Icon(Icons.dark_mode_outlined),
             title: const Text('Dark Mode'),

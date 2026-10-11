@@ -231,7 +231,7 @@ class _NotificationSettingsScreenState
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
-                  color: theme.colorScheme.primary,
+                  color: AppColors.textMuted(context),
                 ),
               ),
             ),
@@ -288,7 +288,7 @@ class _NotificationSettingsScreenState
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: FilledButton.icon(
                     icon: const Icon(Icons.timer_outlined),
                     label: const Text('Test (in 5s)'),
                     onPressed: () async {
@@ -334,7 +334,7 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
+              color: AppColors.textMuted(context),
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
             ),

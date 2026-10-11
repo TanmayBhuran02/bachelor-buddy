@@ -38,8 +38,9 @@ Future<void> main() async {
     debugPrint('Notification initialization error: $e');
   }
 
-  // Load user preferences from DB (default to light mode)
+  // Load user preferences from DB (default to light mode & neobrutalism)
   ThemeMode initialTheme = ThemeMode.light;
+  AppThemeStyle initialStyle = AppThemeStyle.neobrutalism;
   bool isBiometricLockEnabled = false;
 
   try {
@@ -48,6 +49,15 @@ Future<void> main() async {
         .getSingleOrNull();
     if (themeSetting?.value == 'dark') {
       initialTheme = ThemeMode.dark;
+    }
+
+    final styleSetting = await (db.select(db.appSettings)
+          ..where((s) => s.key.equals('theme_style')))
+        .getSingleOrNull();
+    if (styleSetting?.value == 'rawSketchbook' || styleSetting?.value == 'raw_sketchbook') {
+      initialStyle = AppThemeStyle.rawSketchbook;
+    } else {
+      initialStyle = AppThemeStyle.neobrutalism;
     }
 
     final biometricSetting = await (db.select(db.appSettings)
@@ -63,6 +73,7 @@ Future<void> main() async {
       overrides: [
         databaseProvider.overrideWithValue(db),
         themeModeProvider.overrideWith((ref) => initialTheme),
+        themeStyleProvider.overrideWith((ref) => initialStyle),
         biometricLockEnabledProvider.overrideWith((ref) => isBiometricLockEnabled),
         isAuthenticatedProvider.overrideWith((ref) => !isBiometricLockEnabled),
       ],

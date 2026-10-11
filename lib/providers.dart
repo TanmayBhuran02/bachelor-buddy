@@ -4,10 +4,13 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/theme/app_theme.dart';
 import 'core/db/app_database.dart';
 import 'core/events/domain_event.dart';
 import 'features/actions/action_intent.dart';
 import 'features/actions/local_intent_parser.dart';
+
+export 'core/theme/app_theme.dart' show AppThemeStyle;
 
 // ─── Database ──────────────────────────────────────────────────────────────
 
@@ -41,6 +44,10 @@ final intentParserProvider = Provider<IntentParser>((ref) {
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return ThemeMode.light; // Default to light mode; persistent across restarts
+});
+
+final themeStyleProvider = StateProvider<AppThemeStyle>((ref) {
+  return AppThemeStyle.neobrutalism; // Default to Neo-Brutalism
 });
 
 // ─── Security & Biometrics ──────────────────────────────────────────────────

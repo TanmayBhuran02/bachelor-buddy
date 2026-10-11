@@ -23,7 +23,8 @@ class ShellScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final index = _currentIndex(context);
-    final activeIconColor = AppColors.text(context);
+    final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
+    final activeIconColor = isNeo ? const Color(0xFF000000) : AppColors.text(context);
 
     return Scaffold(
       body: child,
@@ -33,7 +34,7 @@ class ShellScaffold extends StatelessWidget {
           border: Border(
             top: BorderSide(
               color: AppColors.border(context),
-              width: 1.5,
+              width: isNeo ? 2.5 : 1.5,
             ),
           ),
         ),

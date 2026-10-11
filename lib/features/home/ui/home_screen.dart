@@ -29,8 +29,13 @@ class HomeScreen extends ConsumerWidget {
             Text(
               _greeting().toUpperCase(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.kraftBrown,
+                    color: AppColors.styleOf(context) == AppThemeStyle.neobrutalism
+                        ? (Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.neoYellow
+                            : const Color(0xFF666666))
+                        : AppColors.kraftBrown,
                     letterSpacing: 1,
+                    fontWeight: FontWeight.w700,
                   ),
             ),
           ],
@@ -199,11 +204,24 @@ class _QuickActionsRow extends StatelessWidget {
       ('WATER', Icons.water_drop, '/water'),
     ];
 
+    final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
+    final neoColors = [
+      AppColors.neoPink,
+      AppColors.neoOrange,
+      AppColors.neoYellow,
+      AppColors.neoCyan,
+    ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: actions.map((a) {
+        children: actions.asMap().entries.map((entry) {
+          final i = entry.key;
+          final a = entry.value;
+          final iconBg = isNeo ? neoColors[i % neoColors.length] : AppColors.surface(context);
+          final iconColor = isNeo ? const Color(0xFF000000) : AppColors.kraftBrown;
+
           return Flexible(
             child: GestureDetector(
               onTap: () => context.push(a.$3),
@@ -213,18 +231,32 @@ class _QuickActionsRow extends StatelessWidget {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: AppColors.surface(context),
-                      borderRadius: BorderRadius.circular(2),
-                      border: Border.all(color: AppColors.border(context), width: 1.5),
+                      color: iconBg,
+                      borderRadius: BorderRadius.circular(isNeo ? 6 : 2),
+                      border: Border.all(
+                        color: AppColors.border(context),
+                        width: isNeo ? 2.5 : 1.5,
+                      ),
+                      boxShadow: isNeo
+                          ? const [
+                              BoxShadow(
+                                color: Color(0xFF000000),
+                                offset: Offset(2.5, 2.5),
+                                blurRadius: 0,
+                                spreadRadius: 0,
+                              ),
+                            ]
+                          : null,
                     ),
-                    child: Icon(a.$2, color: AppColors.kraftBrown, size: 22),
+                    child: Icon(a.$2, color: iconColor, size: 22),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     a.$1,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.textMuted(context),
+                          color: AppColors.text(context),
                           letterSpacing: 0.8,
+                          fontWeight: isNeo ? FontWeight.w800 : FontWeight.w500,
                         ),
                     overflow: TextOverflow.ellipsis,
                   ),
