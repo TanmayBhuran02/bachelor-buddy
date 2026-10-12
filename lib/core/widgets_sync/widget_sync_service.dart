@@ -169,7 +169,7 @@ class WidgetSyncService {
       final pendingTodos = await (db.select(db.todos)
             ..where((t) => t.isDone.equals(false))
             ..orderBy([(t) => OrderingTerm.asc(t.priority), (t) => OrderingTerm.asc(t.createdAt)])
-            ..limit(3))
+            ..limit(6))
           .get();
 
       final tasksList = pendingTodos.map((t) => {'id': t.id, 'title': t.title}).toList();

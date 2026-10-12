@@ -125,79 +125,18 @@ class WaterWidgetProvider : HomeWidgetProvider() {
         }
         canvas.drawCircle(cx, cy, innerRadius, innerStrokePaint)
 
-        // 4. Draw water droplet icon
-        val dropPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            color = Color.parseColor("#00C4B4")
-        }
-        val dropPath = Path().apply {
-            val dropW = 32f
-            val dropH = 46f
-            val topY = cy - 110f
-            moveTo(cx, topY)
-            cubicTo(cx - dropW, topY + dropH * 0.45f, cx - dropW, topY + dropH, cx, topY + dropH)
-            cubicTo(cx + dropW, topY + dropH, cx + dropW, topY + dropH * 0.45f, cx, topY)
-            close()
-        }
-        canvas.drawPath(dropPath, dropPaint)
-
-        // Droplet outline
-        val dropStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            this.strokeWidth = 4f
+        // 4. Center Label: ONLY "+{glassMl}" (e.g. +200)
+        val text = "+$glassMl"
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#1A1A1A")
-        }
-        canvas.drawPath(dropPath, dropStrokePaint)
-
-        // 5. Draw Labels
-        // "+1 GLASS"
-        val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1A1A1A")
-            textSize = 42f
+            textSize = 96f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("+1 GLASS", cx, cy - 20f, titlePaint)
-
-        // "+{glassMl}ml"
-        val portionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#00838F")
-            textSize = 30f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            textAlign = Paint.Align.CENTER
-        }
-        canvas.drawText("+$glassMl ml", cx, cy + 24f, portionPaint)
-
-        // "{intake} / {goal} ml"
-        val progressTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#555555")
-            textSize = 24f
-            typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
-            textAlign = Paint.Align.CENTER
-        }
-        canvas.drawText("$intake / $goal ml", cx, cy + 62f, progressTextPaint)
-
-        // "{percent}% OF GOAL"
-        val pillBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            color = Color.parseColor("#E0F7FA")
-        }
-        val pillStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            this.strokeWidth = 3f
-            color = Color.parseColor("#1A1A1A")
-        }
-        val pillRect = RectF(cx - 72f, cy + 86f, cx + 72f, cy + 120f)
-        canvas.drawRoundRect(pillRect, 8f, 8f, pillBgPaint)
-        canvas.drawRoundRect(pillRect, 8f, 8f, pillStrokePaint)
-
-        val percentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#00695C")
-            textSize = 21f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            textAlign = Paint.Align.CENTER
-        }
-        canvas.drawText("$percent% GOAL", cx, cy + 110f, percentPaint)
+        val textBounds = android.graphics.Rect()
+        textPaint.getTextBounds(text, 0, text.length, textBounds)
+        val yOffset = cy - textBounds.exactCenterY()
+        canvas.drawText(text, cx, yOffset, textPaint)
 
         return bitmap
     }
