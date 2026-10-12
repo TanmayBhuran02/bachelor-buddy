@@ -30,7 +30,7 @@ const List<SupportedApp> kSupportedUpiApps = [
     displayName: 'Paytm',
   ),
   SupportedApp(
-    packageName: 'money.super.app',
+    packageName: 'money.super.payments',
     displayName: 'super.money',
   ),
   SupportedApp(
@@ -57,6 +57,7 @@ class NotificationPreferences {
       'com.google.android.apps.nbu.paisa.user',
       'com.phonepe.app',
       'net.one97.paytm',
+      'money.super.payments',
       'money.super.app',
       'com.whatsapp',
     },
@@ -118,6 +119,7 @@ class NotificationPreferences {
       'com.google.android.apps.nbu.paisa.user',
       'com.phonepe.app',
       'net.one97.paytm',
+      'money.super.payments',
       'money.super.app',
       'com.whatsapp',
     };
@@ -127,6 +129,11 @@ class NotificationPreferences {
         final list = jsonDecode(map['notify_txn_packages']!) as List<dynamic>;
         packages = list.map((e) => e.toString()).toSet();
       } catch (_) {}
+    }
+
+    if (packages.contains('money.super.app') || packages.contains('money.super.payments')) {
+      packages.add('money.super.payments');
+      packages.add('money.super.app');
     }
 
     return NotificationPreferences(

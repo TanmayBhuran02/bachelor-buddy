@@ -31,11 +31,11 @@ void main() {
       expect(txn.appSource, 'PhonePe');
     });
 
-    test('parses super.money UPI notification', () {
+    test('parses super.money UPI notification with official package money.super.payments', () {
       const text = '₹200.00 paid to Starbucks using super.money';
       final txn = TxnParser.parse(
         text: text,
-        packageName: 'money.super.app',
+        packageName: 'money.super.payments',
       );
 
       expect(txn, isNotNull);
@@ -43,6 +43,62 @@ void main() {
       expect(txn.type, 'expense');
       expect(txn.merchantOrParty, 'Starbucks');
       expect(txn.appSource, 'super.money');
+    });
+
+    test('parses super.money UPI notification with legacy package money.super.app', () {
+      const text = 'Payment of ₹85 to Chai Sutta Bar was successful';
+      final txn = TxnParser.parse(
+        text: text,
+        packageName: 'money.super.app',
+      );
+
+      expect(txn, isNotNull);
+      expect(txn!.amountPaise, 8500);
+      expect(txn.type, 'expense');
+      expect(txn.merchantOrParty, 'Chai Sutta Bar');
+      expect(txn.appSource, 'super.money');
+    });
+
+    test('parses Paytm paid successfully notification', () {
+      const text = 'Rs 150 paid successfully to Ramesh Kumar. Ref: 1234567890';
+      final txn = TxnParser.parse(
+        text: text,
+        packageName: 'net.one97.paytm',
+      );
+
+      expect(txn, isNotNull);
+      expect(txn!.amountPaise, 15000);
+      expect(txn.type, 'expense');
+      expect(txn.merchantOrParty, 'Ramesh Kumar');
+      expect(txn.appSource, 'Paytm');
+    });
+
+    test('parses Paytm payment of X to Y was successful', () {
+      const text = 'Payment of ₹250 to Chai Point was successful';
+      final txn = TxnParser.parse(
+        text: text,
+        packageName: 'net.one97.paytm',
+      );
+
+      expect(txn, isNotNull);
+      expect(txn!.amountPaise, 25000);
+      expect(txn.type, 'expense');
+      expect(txn.merchantOrParty, 'Chai Point');
+      expect(txn.appSource, 'Paytm');
+    });
+
+    test('parses Paytm transferred notification', () {
+      const text = 'Transferred ₹1,200 to Sharma Mess via Paytm UPI';
+      final txn = TxnParser.parse(
+        text: text,
+        packageName: 'net.one97.paytm',
+      );
+
+      expect(txn, isNotNull);
+      expect(txn!.amountPaise, 120000);
+      expect(txn.type, 'expense');
+      expect(txn.merchantOrParty, 'Sharma Mess');
+      expect(txn.appSource, 'Paytm');
     });
 
     test('parses Credit / Income notification', () {
