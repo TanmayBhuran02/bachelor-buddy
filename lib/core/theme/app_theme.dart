@@ -491,6 +491,24 @@ class AppColors {
   static Color warningOf(BuildContext context) =>
       Theme.of(context).extension<AppThemeExtension>()?.warningAccent ?? warning;
 
+  /// Dedicated green shade for Tiffin Received across all aesthetic styles and palettes
+  static Color tiffinReceived(BuildContext context) {
+    final ext = Theme.of(context).extension<AppThemeExtension>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (ext?.style == AppThemeStyle.neobrutalism) {
+      return isDark ? neoGreen : const Color(0xFF10B981);
+    }
+    final palette = ext?.sketchbookPalette ?? SketchbookPalette.botanical;
+    switch (palette) {
+      case SketchbookPalette.botanical:
+        return isDark ? const Color(0xFF7EAA8B) : const Color(0xFF4E7A57);
+      case SketchbookPalette.blueprint:
+        return isDark ? const Color(0xFF34D399) : const Color(0xFF16A34A);
+      case SketchbookPalette.sepia:
+        return isDark ? const Color(0xFF8AA87A) : const Color(0xFF586B4D);
+    }
+  }
+
   // Dynamic context-aware helpers
   static Color text(BuildContext context) {
     final ext = Theme.of(context).extension<AppThemeExtension>();

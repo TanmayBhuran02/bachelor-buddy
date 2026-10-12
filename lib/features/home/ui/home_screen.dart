@@ -332,7 +332,7 @@ class _LiveTiffinStatusCard extends ConsumerWidget {
                             : 'PENDING';
 
                     final statusColor = isReceived
-                        ? AppColors.secondary
+                        ? AppColors.tiffinReceived(context)
                         : isSkipped
                             ? AppColors.tertiary
                             : AppColors.warning;

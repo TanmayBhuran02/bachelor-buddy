@@ -259,7 +259,7 @@ class _TiffinMonthlyCard extends StatelessWidget {
                 _StatusMetric(
                   label: 'RECEIVED',
                   value: '${summary.totalReceived}',
-                  color: AppColors.secondary,
+                  color: AppColors.tiffinReceived(context),
                 ),
                 _StatusMetric(
                   label: 'SKIPPED',
@@ -422,7 +422,7 @@ class _TiffinMealCard extends ConsumerWidget {
 
     switch (status) {
       case 'received':
-        statusColor = AppColors.secondary;
+        statusColor = AppColors.tiffinReceived(context);
         statusText = 'RECEIVED (AUTO-LOGGED ₹${plan.pricePerTiffinPaise ~/ 100})';
         statusIcon = Icons.check_circle;
         break;
@@ -587,6 +587,13 @@ class _TiffinMealCard extends ConsumerWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.tiffinReceived(context),
+                        foregroundColor: (Theme.of(context).brightness == Brightness.dark &&
+                                AppColors.styleOf(context) == AppThemeStyle.neobrutalism)
+                            ? const Color(0xFF000000)
+                            : const Color(0xFFFFFFFF),
+                      ),
                       onPressed: () async {
                         await repo.markReceived(planId: plan.id, date: dateStr);
                       },
@@ -601,6 +608,11 @@ class _TiffinMealCard extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: status == 'received'
+                            ? AppColors.tertiaryOf(context)
+                            : AppColors.tiffinReceived(context),
+                      ),
                       onPressed: () async {
                         if (status == 'received') {
                           await repo.markSkipped(planId: plan.id, date: dateStr);
@@ -972,9 +984,44 @@ class _TiffinMonthlyCalendarSheetState
                 logsByDate.putIfAbsent(l.date, () => []).add(l);
               }
 
+              final receivedColor = AppColors.tiffinReceived(context);
+              final skippedColor = AppColors.tertiaryOf(context);
+              final pendingColor = AppColors.warningOf(context);
+
               int monthReceived = 0;
               int monthSkipped = 0;
               int monthPending = 0;
+
+              for (int day = 1; day <= daysInMonth; day++) {
+                final date = DateTime(_displayedMonth.year, _displayedMonth.month, day);
+                final dateStr = DateFormat('yyyy-MM-dd').format(date);
+                final dayLogs = logsByDate[dateStr] ?? [];
+                if (dayLogs.any((l) => l.status == 'received')) monthReceived++;
+                if (dayLogs.any((l) => l.status == 'skipped')) monthSkipped++;
+                if (!date.isAfter(DateTime(now.year, now.month, now.day))) {
+                  final weekdayMask = 1 << (date.weekday - 1);
+                  final applicable = plans.where((p) =>
+                      (p.activeWeekdaysMask & weekdayMask) != 0 &&
+                      p.startDate.compareTo(dateStr) <= 0);
+                  if (applicable.isNotEmpty) {
+                    for (final p in applicable) {
+                      final log = dayLogs.firstWhere(
+                        (l) => l.planId == p.id,
+                        orElse: () => TiffinLog(
+                          id: '',
+                          planId: p.id,
+                          date: dateStr,
+                          status: 'pending',
+                        ),
+                      );
+                      if (log.status == 'pending') {
+                        monthPending++;
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
 
               return Column(
                 children: [
@@ -1032,9 +1079,95 @@ class _TiffinMonthlyCalendarSheetState
                         }
                       }
 
-                      if (hasReceived) monthReceived++;
-                      if (hasSkipped) monthSkipped++;
-                      if (hasPending) monthPending++;
+                      final isNeo = AppColors.styleOf(context) == AppThemeStyle.neobrutalism;
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+
+                      BoxDecoration? highlightDecoration;
+                      Color dayTextColor;
+
+                      if (hasReceived && hasSkipped) {
+                        // Received + Skipped dual tone circular highlight
+                        highlightDecoration = BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [receivedColor, skippedColor],
+                            stops: const [0.5, 0.5],
+                          ),
+                          border: Border.all(
+                            color: isNeo ? const Color(0xFF000000) : AppColors.border(context),
+                            width: isNeo ? 1.5 : 1.0,
+                          ),
+                        );
+                        dayTextColor = Colors.white;
+                      } else if (hasReceived) {
+                        // Solid green circular highlight
+                        highlightDecoration = BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: receivedColor,
+                          border: Border.all(
+                            color: isNeo ? const Color(0xFF000000) : receivedColor,
+                            width: isNeo ? 1.5 : 1.0,
+                          ),
+                          boxShadow: isNeo
+                              ? const [
+                                  BoxShadow(
+                                    color: Color(0xFF000000),
+                                    offset: Offset(1.5, 1.5),
+                                    blurRadius: 0,
+                                  ),
+                                ]
+                              : null,
+                        );
+                        dayTextColor = (isDark && isNeo)
+                            ? const Color(0xFF000000)
+                            : Colors.white;
+                      } else if (hasSkipped) {
+                        // Solid skipped circular highlight
+                        highlightDecoration = BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: skippedColor,
+                          border: Border.all(
+                            color: isNeo ? const Color(0xFF000000) : skippedColor,
+                            width: isNeo ? 1.5 : 1.0,
+                          ),
+                          boxShadow: isNeo
+                              ? const [
+                                  BoxShadow(
+                                    color: Color(0xFF000000),
+                                    offset: Offset(1.5, 1.5),
+                                    blurRadius: 0,
+                                  ),
+                                ]
+                              : null,
+                        );
+                        dayTextColor = Colors.white;
+                      } else if (hasPending) {
+                        // Pending circular highlight (tinted surface + amber border)
+                        highlightDecoration = BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: pendingColor.withValues(alpha: 0.22),
+                          border: Border.all(
+                            color: pendingColor,
+                            width: isNeo ? 1.5 : 1.2,
+                          ),
+                        );
+                        dayTextColor = isDark ? pendingColor : const Color(0xFF854D0E);
+                      } else {
+                        // Unmarked date
+                        highlightDecoration = isToday
+                            ? BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.surface(context),
+                                border: Border.all(
+                                  color: AppColors.border(context),
+                                  width: 1.0,
+                                ),
+                              )
+                            : null;
+                        dayTextColor = AppColors.text(context);
+                      }
 
                       return InkWell(
                         onTap: () {
@@ -1042,76 +1175,50 @@ class _TiffinMonthlyCalendarSheetState
                               dateStr;
                           Navigator.pop(context);
                         },
-                        borderRadius: BorderRadius.circular(4),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.primary.withValues(alpha: 0.15)
-                                : isToday
-                                    ? AppColors.surface(context)
-                                    : Colors.transparent,
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : isToday
-                                      ? AppColors.border(context)
-                                      : Colors.transparent,
-                              width: isSelected ? 1.5 : 1.0,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Center(
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: isSelected
+                                  ? Border.all(
+                                      color: isNeo
+                                          ? AppColors.neoYellow
+                                          : AppColors.primaryOf(context),
+                                      width: 2.5,
+                                    )
+                                  : null,
                             ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
+                            padding: isSelected
+                                ? const EdgeInsets.all(2)
+                                : EdgeInsets.zero,
+                            child: Container(
+                              decoration: highlightDecoration ??
+                                  (isSelected
+                                      ? BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: AppColors.primaryOf(context)
+                                              .withValues(alpha: 0.15),
+                                        )
+                                      : null),
+                              alignment: Alignment.center,
+                              child: Text(
                                 '$day',
                                 style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: isSelected || isToday
+                                  fontSize: 12,
+                                  fontWeight: (highlightDecoration != null ||
+                                          isSelected ||
+                                          isToday)
                                       ? FontWeight.bold
                                       : FontWeight.normal,
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.text(context),
+                                  color: (isSelected && highlightDecoration == null)
+                                      ? AppColors.primaryOf(context)
+                                      : dayTextColor,
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (hasReceived)
-                                    Container(
-                                      width: 5,
-                                      height: 5,
-                                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.secondary,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  if (hasSkipped)
-                                    Container(
-                                      width: 5,
-                                      height: 5,
-                                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.tertiary,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  if (hasPending)
-                                    Container(
-                                      width: 5,
-                                      height: 5,
-                                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.warning,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       );
@@ -1126,17 +1233,17 @@ class _TiffinMonthlyCalendarSheetState
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _CalendarLegendItem(
-                        color: AppColors.secondary,
+                        color: receivedColor,
                         label: 'Received',
                         count: monthReceived,
                       ),
                       _CalendarLegendItem(
-                        color: AppColors.tertiary,
+                        color: skippedColor,
                         label: 'Skipped',
                         count: monthSkipped,
                       ),
                       _CalendarLegendItem(
-                        color: AppColors.warning,
+                        color: pendingColor,
                         label: 'Pending',
                         count: monthPending,
                       ),
@@ -1176,11 +1283,15 @@ class _CalendarLegendItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.border(context),
+              width: 1.0,
+            ),
           ),
         ),
         const SizedBox(width: 6),
