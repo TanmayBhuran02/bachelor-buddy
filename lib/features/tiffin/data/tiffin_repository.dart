@@ -12,6 +12,7 @@ import 'package:bachelor_buddy/core/notifications/notification_preferences.dart'
 import 'package:bachelor_buddy/core/notifications/notification_scheduler.dart';
 import 'package:bachelor_buddy/core/notifications/notification_service.dart';
 import 'package:bachelor_buddy/features/expenses/data/expense_repository.dart';
+import 'package:bachelor_buddy/core/widgets_sync/widget_sync_service.dart';
 
 const _uuid = Uuid();
 
@@ -141,6 +142,7 @@ class TiffinRepository {
 
     final prefs = await NotificationPreferences.load(_db);
     await NotificationScheduler.syncAllReminders(_db, prefs);
+    await WidgetSyncService.syncTiffin(_db);
 
     AppLogger.info(
       'Tiffin action: Created plan $id for "$providerName" ($mealType, ₹${pricePerTiffinPaise ~/ 100})',
@@ -171,6 +173,7 @@ class TiffinRepository {
 
     final prefs = await NotificationPreferences.load(_db);
     await NotificationScheduler.syncAllReminders(_db, prefs);
+    await WidgetSyncService.syncTiffin(_db);
 
     AppLogger.info(
       'Tiffin action: Updated plan $id for "$providerName" ($mealType, ₹${pricePerTiffinPaise ~/ 100})',
@@ -326,6 +329,7 @@ class TiffinRepository {
     await (_db.update(_db.tiffinPlans)..where((p) => p.id.equals(id))).write(
       const TiffinPlansCompanion(isActive: Value(false)),
     );
+    await WidgetSyncService.syncTiffin(_db);
     AppLogger.info(
       'Tiffin action: Deactivated tiffin plan $id',
       context: 'Tiffin',

@@ -3,12 +3,13 @@
     android:id="@+id/widget_tiffin_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_background"
+    android:background="@drawable/widget_dark_bg"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="9dp">
 
     <!-- Header Row -->
     <LinearLayout
+        android:id="@+id/tiffin_widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -16,79 +17,348 @@
 
         <TextView
             android:id="@+id/tiffin_widget_title"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TIFFIN //"
-            android:textColor="#1A1A1A"
+            android:letterSpacing="0.05"
+            android:text="TIFFIN"
+            android:textColor="#94A3B8"
             android:textSize="11sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tiffin_widget_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/widget_badge_dark"
+            android:paddingStart="5dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="1dp"
+            android:text="TODAY"
+            android:textColor="#38BDF8"
+            android:textSize="9sp"
+            android:textStyle="bold" />
+
+        <!-- Spacer -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/tiffin_widget_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:letterSpacing="0.03"
             android:text="PENDING"
-            android:textColor="#C62828"
+            android:textColor="#FBBF24"
             android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Meal Details -->
+    <!-- Empty State -->
+    <LinearLayout
+        android:id="@+id/tiffin_empty_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:layout_weight="1"
+        android:background="@drawable/widget_tile_bg"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tiffin_empty_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Active Meal Plans"
+            android:textColor="#F1F5F9"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tiffin_empty_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Tap to configure daily tiffin"
+            android:textColor="#64748B"
+            android:textSize="9sp" />
+    </LinearLayout>
+
+    <!-- PLAN 1 TILE -->
+    <LinearLayout
+        android:id="@+id/tiffin_plan_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/widget_tile_bg"
+        android:orientation="vertical"
+        android:padding="7dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tiffin_widget_meal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="☀️ Lunch • Sai Tiffin Service"
+                android:textColor="#F1F5F9"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tiffin_status_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="• Pending"
+                android:textColor="#FBBF24"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tiffin_widget_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Price: ₹80 • Daily delivery"
+            android:textColor="#94A3B8"
+            android:textSize="9sp" />
+
+        <!-- Actions for Plan 1 -->
+        <LinearLayout
+            android:id="@+id/tiffin_actions_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btn_tiffin_skip"
+                android:layout_width="0dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/widget_btn_skip_dark"
+                android:gravity="center"
+                android:text="✕ Skip"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btn_tiffin_received"
+                android:layout_width="0dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/widget_btn_got_it"
+                android:gravity="center"
+                android:text="✓ Got it"
+                android:textColor="#062E20"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- PLAN 2 TILE -->
+    <LinearLayout
+        android:id="@+id/tiffin_plan_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/widget_tile_bg"
+        android:orientation="vertical"
+        android:padding="7dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tiffin_meal_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="🌙 Dinner • Sharma Mess"
+                android:textColor="#F1F5F9"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tiffin_status_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="• Pending"
+                android:textColor="#FBBF24"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tiffin_subtitle_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Price: ₹90 • Daily delivery"
+            android:textColor="#94A3B8"
+            android:textSize="9sp" />
+
+        <!-- Actions for Plan 2 -->
+        <LinearLayout
+            android:id="@+id/tiffin_actions_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btn_tiffin_skip_2"
+                android:layout_width="0dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/widget_btn_skip_dark"
+                android:gravity="center"
+                android:text="✕ Skip"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btn_tiffin_received_2"
+                android:layout_width="0dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/widget_btn_got_it"
+                android:gravity="center"
+                android:text="✓ Got it"
+                android:textColor="#062E20"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- PLAN 3 TILE -->
+    <LinearLayout
+        android:id="@+id/tiffin_plan_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/widget_tile_bg"
+        android:orientation="vertical"
+        android:padding="7dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tiffin_meal_3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="☕ Breakfast • Annapurna"
+                android:textColor="#F1F5F9"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tiffin_status_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="• Pending"
+                android:textColor="#FBBF24"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tiffin_subtitle_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Price: ₹50 • Daily delivery"
+            android:textColor="#94A3B8"
+            android:textSize="9sp" />
+
+        <!-- Actions for Plan 3 -->
+        <LinearLayout
+            android:id="@+id/tiffin_actions_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btn_tiffin_skip_3"
+                android:layout_width="0dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/widget_btn_skip_dark"
+                android:gravity="center"
+                android:text="✕ Skip"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btn_tiffin_received_3"
+                android:layout_width="0dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/widget_btn_got_it"
+                android:gravity="center"
+                android:text="✓ Got it"
+                android:textColor="#062E20"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Hint footer for additional plans -->
     <TextView
-        android:id="@+id/tiffin_widget_meal"
+        android:id="@+id/tiffin_more_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Lunch • Sai Tiffin Service"
-        android:textColor="#1A1A1A"
-        android:textSize="11sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/tiffin_widget_subtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Scheduled for today"
-        android:textColor="#666666"
-        android:textSize="9sp" />
-
-    <!-- Action Buttons Row -->
-    <LinearLayout
-        android:id="@+id/tiffin_actions_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/btn_tiffin_skip"
-            android:layout_width="0dp"
-            android:layout_height="22dp"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="1"
-            android:background="@drawable/widget_btn_secondary"
-            android:gravity="center"
-            android:text="Skip"
-            android:textColor="#1A1A1A"
-            android:textSize="10sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/btn_tiffin_received"
-            android:layout_width="0dp"
-            android:layout_height="22dp"
-            android:layout_marginStart="4dp"
-            android:layout_weight="1"
-            android:background="@drawable/widget_btn_purple"
-            android:gravity="center"
-            android:text="Got it"
-            android:textColor="#FFFEEF"
-            android:textSize="10sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+        android:gravity="center"
+        android:text="+1 more plan (resize ↕)"
+        android:textColor="#64748B"
+        android:textSize="9sp"
+        android:textStyle="italic"
+        android:visibility="gone" />
 </LinearLayout>

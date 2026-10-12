@@ -95,7 +95,9 @@ class WidgetSyncService {
   /// Sync tiffin widget from database
   static Future<void> syncTiffin(AppDatabase db) async {
     try {
-      final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final now = DateTime.now();
+      final todayStr = DateFormat('yyyy-MM-dd').format(now);
+      final weekdayMask = 1 << (now.weekday - 1);
 
       final activePlans = await (db.select(db.tiffinPlans)..where((p) => p.isActive.equals(true))).get();
       if (activePlans.isEmpty) {
@@ -105,24 +107,48 @@ class WidgetSyncService {
           'price': '',
           'planId': '',
           'date': todayStr,
+          'plans': [],
         });
         return;
       }
 
-      // Pick current or next meal
-      final plan = activePlans.first;
-      final log = await (db.select(db.tiffinLogs)
-            ..where((l) => l.planId.equals(plan.id) & l.date.equals(todayStr)))
-          .getSingleOrNull();
+      // Filter plans applicable today, fallback to all active if none scheduled for today
+      final todayPlans = activePlans.where((p) =>
+          (p.activeWeekdaysMask & weekdayMask) != 0 &&
+          p.startDate.compareTo(todayStr) <= 0).toList();
+      final plansToSync = todayPlans.isNotEmpty ? todayPlans : activePlans;
 
-      final status = log?.status ?? 'pending';
+      final plansData = <Map<String, dynamic>>[];
+      for (final plan in plansToSync) {
+        final log = await (db.select(db.tiffinLogs)
+              ..where((l) => l.planId.equals(plan.id) & l.date.equals(todayStr)))
+            .getSingleOrNull();
+
+        final status = log?.status ?? 'pending';
+        plansData.add({
+          'planId': plan.id,
+          'meal': '${plan.mealType.toUpperCase()} • ${plan.providerName}',
+          'mealType': plan.mealType,
+          'provider': plan.providerName,
+          'price': Money.format(plan.pricePerTiffinPaise, showDecimal: false),
+          'status': status,
+          'date': todayStr,
+        });
+      }
+
+      // Primary plan for legacy/single display (prioritize first pending plan)
+      final primaryPlan = plansData.firstWhere(
+        (p) => p['status'] == 'pending',
+        orElse: () => plansData.first,
+      );
 
       await refresh(WidgetKey.tiffin, {
-        'meal': '${plan.mealType.toUpperCase()} • ${plan.providerName}',
-        'status': status,
-        'price': Money.format(plan.pricePerTiffinPaise, showDecimal: false),
-        'planId': plan.id,
+        'meal': primaryPlan['meal'],
+        'status': primaryPlan['status'],
+        'price': primaryPlan['price'],
+        'planId': primaryPlan['planId'],
         'date': todayStr,
+        'plans': plansData,
       });
     } catch (e) {
       AppLogger.error('Failed to sync tiffin widget: $e', context: 'WidgetSync');
@@ -200,7 +226,9 @@ class WidgetSyncService {
           event is ExpenseUpdated ||
           event is ExpenseDeleted) {
         syncBudget(db);
-      } else if (event is TiffinReceived || event is TiffinSkipped) {
+      } else if (event is TiffinReceived ||
+          event is TiffinSkipped ||
+          event is TiffinLogged) {
         syncTiffin(db);
         syncBudget(db);
       } else if (event is WaterLogged) {
