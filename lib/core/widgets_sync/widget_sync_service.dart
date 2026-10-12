@@ -136,19 +136,24 @@ class WidgetSyncService {
         });
       }
 
-      // Primary plan for legacy/single display (prioritize first pending plan)
-      final primaryPlan = plansData.firstWhere(
-        (p) => p['status'] == 'pending',
-        orElse: () => plansData.first,
-      );
+      // Exclude plans that are already received for today
+      final unreceivedPlans = plansData.where((p) =>
+          p['status'] != 'received').toList();
+      final allReceived = plansData.isNotEmpty && unreceivedPlans.isEmpty;
+
+      final primaryPlan = unreceivedPlans.isNotEmpty
+          ? unreceivedPlans.first
+          : (plansData.isNotEmpty ? plansData.first : null);
 
       await refresh(WidgetKey.tiffin, {
-        'meal': primaryPlan['meal'],
-        'status': primaryPlan['status'],
-        'price': primaryPlan['price'],
-        'planId': primaryPlan['planId'],
+        'meal': primaryPlan != null ? primaryPlan['meal'] : (allReceived ? 'All Meals Received' : 'No Active Plan'),
+        'status': primaryPlan != null ? primaryPlan['status'] : (allReceived ? 'received' : 'inactive'),
+        'price': primaryPlan != null ? primaryPlan['price'] : '',
+        'planId': primaryPlan != null ? primaryPlan['planId'] : '',
         'date': todayStr,
-        'plans': plansData,
+        'plans': unreceivedPlans,
+        'allReceived': allReceived,
+        'totalPlansToday': plansData.length,
       });
     } catch (e) {
       AppLogger.error('Failed to sync tiffin widget: $e', context: 'WidgetSync');

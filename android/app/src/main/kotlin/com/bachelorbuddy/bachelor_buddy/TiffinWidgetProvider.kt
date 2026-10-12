@@ -108,75 +108,62 @@ class TiffinWidgetProvider : HomeWidgetProvider() {
             }
         }
 
+        val allReceived = if (rawData != null) {
+            try { JSONObject(rawData).optBoolean("allReceived", false) } catch (e: Exception) { false }
+        } else false
+
+        // Exclude plans that are already received for today
+        val unreceivedList = planList.filter { p ->
+            !p.optString("status", "").equals("received", ignoreCase = true)
+        }
+
         val maxPlans = when {
             effectiveHeight in 1..95 -> 1
             effectiveHeight in 96..165 -> 2
             effectiveHeight > 165 -> 3
-            else -> if (planList.size <= 1) 1 else 2
+            else -> if (unreceivedList.size <= 1) 1 else 2
         }
 
-        if (planList.isEmpty()) {
-            // Empty state
+        if (unreceivedList.isEmpty()) {
+            // Either all meals received for today, or no active plan configured
             views.setViewVisibility(R.id.tiffin_empty_layout, View.VISIBLE)
             views.setViewVisibility(R.id.tiffin_plan_1, View.GONE)
             views.setViewVisibility(R.id.tiffin_plan_2, View.GONE)
             views.setViewVisibility(R.id.tiffin_plan_3, View.GONE)
             views.setViewVisibility(R.id.tiffin_more_hint, View.GONE)
 
-            views.setTextViewText(R.id.tiffin_empty_title, "No Active Meal Plans")
-            views.setTextColor(R.id.tiffin_empty_title, Color.parseColor("#F1F5F9"))
-            views.setTextViewText(R.id.tiffin_empty_subtitle, "Tap to configure daily tiffin")
-            views.setTextViewText(R.id.tiffin_widget_count, "0 PLANS")
-            views.setTextViewText(R.id.tiffin_widget_status, "INACTIVE")
-            views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#9E9EB0"))
+            if (allReceived || planList.isNotEmpty()) {
+                // All meals confirmed!
+                views.setTextViewText(R.id.tiffin_empty_title, "✓ All Meals Received Today")
+                views.setTextColor(R.id.tiffin_empty_title, Color.parseColor("#34D399"))
+                views.setTextViewText(R.id.tiffin_empty_subtitle, "All scheduled tiffins logged")
+                views.setTextViewText(R.id.tiffin_widget_count, "ALL DONE")
+                views.setTextViewText(R.id.tiffin_widget_status, "RECEIVED")
+                views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#34D399"))
+            } else {
+                views.setTextViewText(R.id.tiffin_empty_title, "No Active Meal Plans")
+                views.setTextColor(R.id.tiffin_empty_title, Color.parseColor("#F1F5F9"))
+                views.setTextViewText(R.id.tiffin_empty_subtitle, "Tap to configure daily tiffin")
+                views.setTextViewText(R.id.tiffin_widget_count, "0 PLANS")
+                views.setTextViewText(R.id.tiffin_widget_status, "INACTIVE")
+                views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#9E9EB0"))
+            }
         } else {
             views.setViewVisibility(R.id.tiffin_empty_layout, View.GONE)
 
-            val countText = if (planList.size == 1) "1 PLAN" else "${planList.size} PLANS"
+            val countText = if (unreceivedList.size == 1) "1 PENDING" else "${unreceivedList.size} PENDING"
             views.setTextViewText(R.id.tiffin_widget_count, countText)
+            views.setTextViewText(R.id.tiffin_widget_status, "PENDING")
+            views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#FBBF24"))
 
-            // Header status calculation
-            val allReceived = planList.all { it.optString("status", "").equals("received", ignoreCase = true) }
-            val allSkipped = planList.all { it.optString("status", "").equals("skipped", ignoreCase = true) }
-            val anyPending = planList.any { !it.optString("status", "").equals("received", ignoreCase = true) && !it.optString("status", "").equals("skipped", ignoreCase = true) }
-
-            when {
-                allReceived -> {
-                    views.setTextViewText(R.id.tiffin_widget_status, "ALL RECEIVED")
-                    views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#34D399"))
-                }
-                allSkipped -> {
-                    views.setTextViewText(R.id.tiffin_widget_status, "SKIPPED")
-                    views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#F87171"))
-                }
-                anyPending -> {
-                    views.setTextViewText(R.id.tiffin_widget_status, "PENDING")
-                    views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#FBBF24"))
-                }
-                else -> {
-                    views.setTextViewText(R.id.tiffin_widget_status, "ACTIVE")
-                    views.setTextColor(R.id.tiffin_widget_status, Color.parseColor("#34D399"))
-                }
-            }
-
-            // In compact 1-plan view, prioritize the pending meal so user can interact immediately
-            val orderedList = if (maxPlans == 1 && planList.size > 1) {
-                planList.sortedBy { p ->
-                    val s = p.optString("status", "").lowercase()
-                    if (s != "received" && s != "skipped") 0 else 1
-                }
-            } else {
-                planList
-            }
-
-            val numToShow = orderedList.size.coerceAtMost(maxPlans)
+            val numToShow = unreceivedList.size.coerceAtMost(maxPlans)
 
             // Slot 1
             if (numToShow >= 1) {
                 bindPlanSlot(
                     context = context,
                     views = views,
-                    plan = orderedList[0],
+                    plan = unreceivedList[0],
                     containerId = R.id.tiffin_plan_1,
                     mealId = R.id.tiffin_widget_meal,
                     subtitleId = R.id.tiffin_widget_subtitle,
@@ -194,7 +181,7 @@ class TiffinWidgetProvider : HomeWidgetProvider() {
                 bindPlanSlot(
                     context = context,
                     views = views,
-                    plan = orderedList[1],
+                    plan = unreceivedList[1],
                     containerId = R.id.tiffin_plan_2,
                     mealId = R.id.tiffin_meal_2,
                     subtitleId = R.id.tiffin_subtitle_2,
@@ -212,7 +199,7 @@ class TiffinWidgetProvider : HomeWidgetProvider() {
                 bindPlanSlot(
                     context = context,
                     views = views,
-                    plan = orderedList[2],
+                    plan = unreceivedList[2],
                     containerId = R.id.tiffin_plan_3,
                     mealId = R.id.tiffin_meal_3,
                     subtitleId = R.id.tiffin_subtitle_3,
@@ -226,7 +213,7 @@ class TiffinWidgetProvider : HomeWidgetProvider() {
             }
 
             // Hint footer if more plans remain
-            val remaining = orderedList.size - numToShow
+            val remaining = unreceivedList.size - numToShow
             if (remaining > 0) {
                 views.setViewVisibility(R.id.tiffin_more_hint, View.VISIBLE)
                 val hintText = if (remaining == 1) "+1 more plan (resize ↕)" else "+$remaining more plans (resize ↕)"
